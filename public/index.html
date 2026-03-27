@@ -1,0 +1,398 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Manfrotto Product Advisor</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    background: #fff;
+    color: #111;
+    font-size: clamp(13px, 1.5vw, 15px);
+  }
+
+  .wrap { max-width: 700px; margin: 0 auto; padding: 24px 16px; }
+
+  .header { display: flex; align-items: center; gap: 10px; margin-bottom: 20px; }
+  .logo { background: #e8192c; color: #fff; font-weight: 600; font-size: 13px; padding: 4px 10px; border-radius: 6px; letter-spacing: 0.05em; }
+  .header-title { font-size: 17px; font-weight: 600; }
+  .header-sub { font-size: 12px; color: #888; margin-top: 2px; }
+
+  .card { border: 1px solid #e5e5e5; border-radius: 10px; padding: 16px; margin-bottom: 10px; background: #fafafa; }
+  .step-label { font-size: 11px; color: #e8192c; font-weight: 600; letter-spacing: 0.08em; margin-bottom: 6px; }
+  .step-title { font-size: 14px; font-weight: 600; margin-bottom: 12px; }
+
+  .cat-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+  .cat-btn {
+    background: #fff; border: 1px solid #e0e0e0; border-radius: 8px;
+    padding: 10px 6px; text-align: center; cursor: pointer;
+    transition: border-color 0.15s, background 0.15s;
+  }
+  .cat-btn:hover { border-color: #e8192c; }
+  .cat-btn.active { border: 2px solid #e8192c; background: #fff5f5; }
+  .cat-icon { font-size: 20px; display: block; margin-bottom: 4px; }
+  .cat-name { font-size: 12px; font-weight: 600; }
+  .cat-sub { font-size: 10px; color: #999; margin-top: 1px; }
+
+  .subform { display: none; }
+  .subform.show { display: block; }
+  .form-section { margin-bottom: 12px; }
+  .form-label { font-size: 12px; color: #666; margin-bottom: 6px; display: block; }
+  .tag-wrap { display: flex; flex-wrap: wrap; gap: 6px; }
+  .tag {
+    background: #fff; border: 1px solid #ddd; border-radius: 20px;
+    padding: 4px 12px; font-size: 12px; cursor: pointer; color: #333;
+    transition: all 0.12s; user-select: none;
+  }
+  .tag:hover { border-color: #e8192c; }
+  .tag.on { background: #e8192c; color: #fff; border-color: #e8192c; }
+
+  input[type=text] {
+    width: 100%; border: 1px solid #ddd; border-radius: 8px;
+    padding: 8px 12px; font-size: 13px; outline: none;
+    transition: border-color 0.15s;
+  }
+  input[type=text]:focus { border-color: #e8192c; }
+
+  .send-btn {
+    width: 100%; background: #e8192c; color: #fff; border: none;
+    border-radius: 8px; padding: 13px; font-size: 14px; font-weight: 600;
+    cursor: pointer; transition: opacity 0.15s; margin-top: 4px;
+  }
+  .send-btn:hover { opacity: 0.88; }
+  .send-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+
+  #step2, #step3 { display: none; }
+
+  /* Results */
+  #result-area { display: none; margin-top: 12px; }
+  .result-card { border: 1px solid #e5e5e5; border-radius: 10px; padding: 16px; background: #fff; }
+  .result-header { font-size: 13px; font-weight: 600; color: #888; margin-bottom: 12px; display: flex; align-items: center; gap: 8px; }
+
+  .product { border-top: 1px solid #f0f0f0; padding: 14px 0; }
+  .product:first-of-type { border-top: none; padding-top: 0; }
+  .product-name { font-size: 15px; font-weight: 700; color: #111; margin-bottom: 2px; }
+  .product-sku { font-size: 11px; color: #999; font-family: monospace; margin-bottom: 6px; }
+  .product-reason { font-size: 12px; color: #555; line-height: 1.6; margin-bottom: 8px; }
+  .product-link {
+    display: inline-block; color: #e8192c; font-size: 12px; font-weight: 600;
+    text-decoration: none; border-bottom: 1px solid #e8192c; padding-bottom: 1px;
+  }
+  .product-link:hover { opacity: 0.7; }
+
+  .loading { display: flex; align-items: center; gap: 8px; color: #888; font-size: 13px; }
+  .dots { display: inline-flex; gap: 3px; }
+  .dot { width: 5px; height: 5px; border-radius: 50%; background: #e8192c; animation: pulse 1.2s infinite; }
+  .dot:nth-child(2) { animation-delay: 0.2s; }
+  .dot:nth-child(3) { animation-delay: 0.4s; }
+  @keyframes pulse { 0%,80%,100%{opacity:0.2} 40%{opacity:1} }
+
+  .error { color: #e8192c; font-size: 13px; padding: 8px; background: #fff5f5; border-radius: 6px; }
+  .reset-btn { background: none; border: 1px solid #ddd; border-radius: 6px; padding: 6px 14px; font-size: 12px; cursor: pointer; color: #666; margin-top: 12px; }
+  .reset-btn:hover { border-color: #999; }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="header">
+    <span class="logo">Manfrotto</span>
+    <div>
+      <div class="header-title">商品アドバイザー</div>
+      <div class="header-sub">条件を入力してAIに推薦してもらいます</div>
+    </div>
+  </div>
+
+  <!-- Step 1: Category -->
+  <div class="card" id="step1">
+    <div class="step-label">STEP 1</div>
+    <div class="step-title">カテゴリーを選んでください</div>
+    <div class="cat-grid">
+      <div class="cat-btn" id="c-bag" onclick="pickCat('bag')">
+        <span class="cat-icon">🎒</span>
+        <div class="cat-name">カメラバッグ</div>
+        <div class="cat-sub">Camera Bag</div>
+      </div>
+      <div class="cat-btn" id="c-tripod" onclick="pickCat('tripod')">
+        <span class="cat-icon">📷</span>
+        <div class="cat-name">三脚</div>
+        <div class="cat-sub">Tripod</div>
+      </div>
+      <div class="cat-btn" id="c-head" onclick="pickCat('head')">
+        <span class="cat-icon">🎬</span>
+        <div class="cat-name">雲台</div>
+        <div class="cat-sub">Ball Head</div>
+      </div>
+      <div class="cat-btn" id="c-monopod" onclick="pickCat('monopod')">
+        <span class="cat-icon">🦯</span>
+        <div class="cat-name">一脚</div>
+        <div class="cat-sub">Monopod</div>
+      </div>
+      <div class="cat-btn" id="c-light" onclick="pickCat('light')">
+        <span class="cat-icon">💡</span>
+        <div class="cat-name">照明</div>
+        <div class="cat-sub">Lighting</div>
+      </div>
+      <div class="cat-btn" id="c-other" onclick="pickCat('other')">
+        <span class="cat-icon">✦</span>
+        <div class="cat-name">その他</div>
+        <div class="cat-sub">Other</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Step 2: Details -->
+  <div class="card" id="step2">
+    <div class="step-label">STEP 2</div>
+    <div class="step-title" id="step2-title">詳細を教えてください</div>
+
+    <div class="subform" id="f-bag">
+      <div class="form-section">
+        <span class="form-label">ボディの台数</span>
+        <div class="tag-wrap" id="g-bodies">
+          <span class="tag" onclick="tog(this,'g-bodies')">1台</span>
+          <span class="tag" onclick="tog(this,'g-bodies')">2台</span>
+          <span class="tag" onclick="tog(this,'g-bodies')">3台以上</span>
+        </div>
+      </div>
+      <div class="form-section">
+        <span class="form-label">レンズの本数</span>
+        <div class="tag-wrap" id="g-lenses">
+          <span class="tag" onclick="tog(this,'g-lenses')">1〜2本</span>
+          <span class="tag" onclick="tog(this,'g-lenses')">3〜4本</span>
+          <span class="tag" onclick="tog(this,'g-lenses')">5本以上</span>
+        </div>
+      </div>
+      <div class="form-section">
+        <span class="form-label">用途</span>
+        <div class="tag-wrap" id="g-baguse">
+          <span class="tag" onclick="tog(this,'g-baguse')">旅行・登山</span>
+          <span class="tag" onclick="tog(this,'g-baguse')">街撮り・日常</span>
+          <span class="tag" onclick="tog(this,'g-baguse')">プロ撮影</span>
+          <span class="tag" onclick="tog(this,'g-baguse')">ビデオ撮影</span>
+        </div>
+      </div>
+      <div class="form-section">
+        <span class="form-label">バッグタイプ</span>
+        <div class="tag-wrap" id="g-bagtype">
+          <span class="tag" onclick="tog(this,'g-bagtype')">バックパック</span>
+          <span class="tag" onclick="tog(this,'g-bagtype')">ショルダー</span>
+          <span class="tag" onclick="tog(this,'g-bagtype')">トート</span>
+          <span class="tag" onclick="tog(this,'g-bagtype')">こだわらない</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="subform" id="f-tripod">
+      <div class="form-section">
+        <span class="form-label">カメラの種類</span>
+        <div class="tag-wrap" id="g-camtype">
+          <span class="tag" onclick="tog(this,'g-camtype')">ミラーレス</span>
+          <span class="tag" onclick="tog(this,'g-camtype')">一眼レフ</span>
+          <span class="tag" onclick="tog(this,'g-camtype')">シネマカメラ</span>
+          <span class="tag" onclick="tog(this,'g-camtype')">スマートフォン</span>
+        </div>
+      </div>
+      <div class="form-section">
+        <span class="form-label">撮影シーン</span>
+        <div class="tag-wrap" id="g-scene">
+          <span class="tag" onclick="tog(this,'g-scene')">風景・夜景</span>
+          <span class="tag" onclick="tog(this,'g-scene')">ポートレート</span>
+          <span class="tag" onclick="tog(this,'g-scene')">動画・Vlog</span>
+          <span class="tag" onclick="tog(this,'g-scene')">スポーツ・動物</span>
+          <span class="tag" onclick="tog(this,'g-scene')">登山・旅行</span>
+          <span class="tag" onclick="tog(this,'g-scene')">スタジオ</span>
+        </div>
+      </div>
+      <div class="form-section">
+        <span class="form-label">素材の希望</span>
+        <div class="tag-wrap" id="g-mat">
+          <span class="tag" onclick="tog(this,'g-mat')">カーボン（軽量）</span>
+          <span class="tag" onclick="tog(this,'g-mat')">アルミ（コスパ）</span>
+          <span class="tag" onclick="tog(this,'g-mat')">こだわらない</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="subform" id="f-head">
+      <div class="form-section">
+        <span class="form-label">主な撮影</span>
+        <div class="tag-wrap" id="g-headuse">
+          <span class="tag" onclick="tog(this,'g-headuse')">写真（静止画）</span>
+          <span class="tag" onclick="tog(this,'g-headuse')">動画・映像</span>
+          <span class="tag" onclick="tog(this,'g-headuse')">両方</span>
+        </div>
+      </div>
+      <div class="form-section">
+        <span class="form-label">機材の重量</span>
+        <div class="tag-wrap" id="g-headwt">
+          <span class="tag" onclick="tog(this,'g-headwt')">〜2kg</span>
+          <span class="tag" onclick="tog(this,'g-headwt')">2〜5kg</span>
+          <span class="tag" onclick="tog(this,'g-headwt')">5kg以上</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="subform" id="f-monopod">
+      <div class="form-section">
+        <span class="form-label">用途</span>
+        <div class="tag-wrap" id="g-monouse">
+          <span class="tag" onclick="tog(this,'g-monouse')">スポーツ・イベント</span>
+          <span class="tag" onclick="tog(this,'g-monouse')">動画・走り撮り</span>
+          <span class="tag" onclick="tog(this,'g-monouse')">登山・トレイル</span>
+        </div>
+      </div>
+      <div class="form-section">
+        <span class="form-label">素材</span>
+        <div class="tag-wrap" id="g-monomat">
+          <span class="tag" onclick="tog(this,'g-monomat')">カーボン</span>
+          <span class="tag" onclick="tog(this,'g-monomat')">アルミ</span>
+          <span class="tag" onclick="tog(this,'g-monomat')">こだわらない</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="subform" id="f-light">
+      <div class="form-section">
+        <span class="form-label">撮影シーン</span>
+        <div class="tag-wrap" id="g-lightuse">
+          <span class="tag" onclick="tog(this,'g-lightuse')">ポートレート</span>
+          <span class="tag" onclick="tog(this,'g-lightuse')">動画・YouTube</span>
+          <span class="tag" onclick="tog(this,'g-lightuse')">商品撮影</span>
+          <span class="tag" onclick="tog(this,'g-lightuse')">屋外ロケ</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="subform" id="f-other">
+      <div class="form-section">
+        <span class="form-label">お探しの商品を教えてください</span>
+        <input type="text" id="other-txt" placeholder="例：スマートフォンホルダー、クランプ..."/>
+      </div>
+    </div>
+  </div>
+
+  <!-- Step 3: Extra -->
+  <div class="card" id="step3">
+    <div class="step-label">STEP 3 — 任意</div>
+    <div class="step-title">予算・その他のご希望</div>
+    <input type="text" id="extra-txt" placeholder="例：予算2万円以内、軽量重視..."/>
+  </div>
+
+  <button class="send-btn" id="send-btn" style="display:none" onclick="doSend()">おすすめ商品を探す</button>
+
+  <!-- Result -->
+  <div id="result-area">
+    <div class="result-card">
+      <div class="result-header" id="result-header">
+        <div class="loading">
+          <div class="dots"><div class="dot"></div><div class="dot"></div><div class="dot"></div></div>
+          manfrotto.com を検索中...
+        </div>
+      </div>
+      <div id="result-body"></div>
+    </div>
+    <button class="reset-btn" onclick="resetForm()">← 最初からやり直す</button>
+  </div>
+
+</div>
+
+<script>
+let cat = null;
+const groups = {};
+
+function pickCat(c) {
+  document.querySelectorAll('.cat-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('c-' + c).classList.add('active');
+  document.querySelectorAll('.subform').forEach(f => f.classList.remove('show'));
+  const f = document.getElementById('f-' + c);
+  if (f) f.classList.add('show');
+  const titles = {
+    bag:'カメラバッグの詳細を教えてください',
+    tripod:'三脚の詳細を教えてください',
+    head:'雲台の詳細を教えてください',
+    monopod:'一脚の詳細を教えてください',
+    light:'照明の詳細を教えてください',
+    other:'お探しの商品を教えてください'
+  };
+  document.getElementById('step2-title').textContent = titles[c];
+  document.getElementById('step2').style.display = 'block';
+  document.getElementById('step3').style.display = 'block';
+  document.getElementById('send-btn').style.display = 'block';
+  cat = c;
+}
+
+function tog(el, gid) {
+  el.classList.toggle('on');
+  if (!groups[gid]) groups[gid] = new Set();
+  if (el.classList.contains('on')) groups[gid].add(el.textContent.trim());
+  else groups[gid].delete(el.textContent.trim());
+}
+
+function getVals(gid) {
+  return groups[gid] ? [...groups[gid]].join('・') : '';
+}
+
+function buildMessage() {
+  const catLabel = {bag:'カメラバッグ',tripod:'三脚',head:'雲台',monopod:'一脚',light:'照明',other:'アクセサリー'}[cat];
+  const extra = document.getElementById('extra-txt').value.trim();
+  const other = document.getElementById('other-txt') ? document.getElementById('other-txt').value.trim() : '';
+  const fieldMap = {
+    bag:[['g-bodies','ボディ台数'],['g-lenses','レンズ本数'],['g-baguse','用途'],['g-bagtype','バッグタイプ']],
+    tripod:[['g-camtype','カメラ種類'],['g-scene','撮影シーン'],['g-mat','素材希望']],
+    head:[['g-headuse','主な撮影'],['g-headwt','機材重量']],
+    monopod:[['g-monouse','用途'],['g-monomat','素材']],
+    light:[['g-lightuse','撮影シーン']],
+    other:[]
+  };
+  let msg = `カテゴリー：${catLabel}\n`;
+  for (const [gid, label] of (fieldMap[cat] || [])) {
+    const v = getVals(gid);
+    if (v) msg += `${label}：${v}\n`;
+  }
+  if (other) msg += `希望内容：${other}\n`;
+  if (extra) msg += `その他希望：${extra}\n`;
+  msg += '\nmanfrotto.com から実在する商品を3点推薦してください。';
+  return msg;
+}
+
+async function doSend() {
+  if (!cat) return;
+  const btn = document.getElementById('send-btn');
+  btn.disabled = true;
+  document.getElementById('result-area').style.display = 'block';
+  document.getElementById('result-header').innerHTML = `
+    <div class="loading">
+      <div class="dots"><div class="dot"></div><div class="dot"></div><div class="dot"></div></div>
+      manfrotto.com を検索中...
+    </div>`;
+  document.getElementById('result-body').innerHTML = '';
+  document.getElementById('result-area').scrollIntoView({ behavior: 'smooth', block: 'start' });
+
+  try {
+    const res = await fetch('/api/chat', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ message: buildMessage() })
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error || 'API error');
+
+    document.getElementById('result-header').textContent = 'おすすめ商品';
+    document.getElementById('result-body').innerHTML = data.reply;
+  } catch (e) {
+    document.getElementById('result-header').textContent = 'エラーが発生しました';
+    document.getElementById('result-body').innerHTML = `<div class="error">${e.message}</div>`;
+  }
+  btn.disabled = false;
+}
+
+function resetForm() {
+  location.reload();
+}
+</script>
+</body>
+</html>
