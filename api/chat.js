@@ -10,6 +10,7 @@ export default async function handler(req, res) {
   if (!message) return res.status(400).json({ error: 'No message provided' });
 
   try {
+    // Step 1: Claude で商品を検索
     const response = await fetch('https://openrouter.ai/api/v1/chat/completions', {
       method: 'POST',
       headers: {
@@ -28,8 +29,7 @@ export default async function handler(req, res) {
 【重要なルール】
 - 必ず https://www.manfrotto.com/jp-ja/ を実際に検索して実在する商品を3点見つけること
 - 商品ページのURLは必ず https://www.manfrotto.com/jp-ja/ で始まること
-- 各商品の画像URLも必ず取得すること（manfrotto.comまたはcdn.manfrotto.comから）
-- 存在しない商品・URL・画像URLは絶対に作らないこと
+- 存在しない商品・URLは絶対に作らないこと
 - すべて日本語で回答すること
 
 【回答フォーマット】
@@ -39,8 +39,7 @@ export default async function handler(req, res) {
     "name": "商品名",
     "sku": "型番",
     "reason": "推薦理由（2〜3文）",
-    "url": "https://www.manfrotto.com/jp-ja/...",
-    "image": "https://cdn.manfrotto.com/media/catalog/product/..."
+    "url": "https://www.manfrotto.com/jp-ja/..."
   },
   { ... },
   { ... }
@@ -56,21 +55,16 @@ export default async function handler(req, res) {
     });
 
     const data = await response.json();
-
-    if (!response.ok) {
-      throw new Error(data.error?.message || 'OpenRouter API error');
-    }
+    if (!response.ok) throw new Error(data.error?.message || 'OpenRouter API error');
 
     const raw = data.choices?.[0]?.message?.content || '';
 
-    // JSONを抽出
+    // Step 2: JSONを抽出
     let products = [];
     try {
       const clean = raw.replace(/```json|```/g, '').trim();
       const match = clean.match(/\[[\s\S]*\]/);
-      if (match) {
-        products = JSON.parse(match[0]);
-      }
+      if (match) products = JSON.parse(match[0]);
     } catch (e) {
       return res.status(200).json({
         reply: `<div style="font-size:13px;line-height:1.9;white-space:pre-wrap">${raw}</div>`
@@ -83,9 +77,34 @@ export default async function handler(req, res) {
       });
     }
 
-    // HTMLに変換
-    const html = products.map(p => {
-      // 画像URLが取得できた場合はそれを使用、なければデフォルト画像
+    // Step 3: 各商品ページから画像URLを取得
+    const productsWithImages = await Promise.all(products.map(async (p) => {
+      try {
+        const pageRes = await fetch(p.url, {
+          headers: { 'User-Agent': 'Mozilla/5.0' },
+          signal: AbortSignal.timeout(5000)
+        });
+        const html = await pageRes.text();
+
+        // og:image メタタグから画像URLを取得
+        const ogMatch = html.match(/<meta[^>]*property=["']og:image["'][^>]*content=["']([^"']+)["']/i)
+                     || html.match(/<meta[^>]*content=["']([^"']+)["'][^>]*property=["']og:image["']/i);
+
+        if (ogMatch && ogMatch[1]) {
+          p.image = ogMatch[1];
+        } else {
+          // cdn.manfrotto.com の画像を探す
+          const cdnMatch = html.match(/https:\/\/cdn\.manfrotto\.com\/media\/catalog\/product[^"'\s]+\.(jpg|png|webp)/i);
+          if (cdnMatch) p.image = cdnMatch[0];
+        }
+      } catch (e) {
+        // 画像取得失敗は無視、デフォルト画像を使用
+      }
+      return p;
+    }));
+
+    // Step 4: HTMLに変換
+    const html = productsWithImages.map(p => {
       const imgSrc = p.image && p.image.startsWith('http') ? p.image : '/images/hero-tripod.png';
       return `
 <div class="product">
