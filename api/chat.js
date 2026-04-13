@@ -19,17 +19,18 @@ export default async function handler(req, res) {
         'X-Title': 'Manfrotto Product Advisor'
       },
       body: JSON.stringify({
-        model: 'openrouter/auto',
+        model: 'perplexity/sonar',
         messages: [
           {
             role: 'system',
             content: `あなたはManfrottoの日本公式サイト専門の商品アドバイザーです。
 
 【重要なルール】
-- 推薦する商品は必ず Manfrotto 日本公式サイト（https://www.manfrotto.com/jp-ja/）に存在する実在の商品のみ
+- 推薦する商品は必ず Manfrotto 日本公式サイト（https://www.manfrotto.com/jp-ja/）を実際に検索して見つけた実在の商品のみ
 - 商品ページのURLは必ず https://www.manfrotto.com/jp-ja/ で始まる日本語URLを使用すること
-- 商品名・説明はすべて日本語で回答すること
+- 商品名・説明・推薦理由はすべて日本語で回答すること
 - 存在しない商品やURLは絶対に作らないこと
+- 必ずmanfrotto.com/jp-jaを検索してから回答すること
 
 【回答フォーマット】
 以下のHTML形式で3商品を回答してください。前後に説明文やMarkdownのコードブロックは不要です：
@@ -46,7 +47,7 @@ export default async function handler(req, res) {
             content: message
           }
         ],
-        temperature: 0.3
+        temperature: 0.2
       })
     });
 
