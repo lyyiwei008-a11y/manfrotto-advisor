@@ -19,21 +19,20 @@ export default async function handler(req, res) {
         'X-Title': 'Manfrotto Product Advisor'
       },
       body: JSON.stringify({
-        model: 'perplexity/sonar',
+        model: 'anthropic/claude-haiku-4-5:online',
         messages: [
           {
             role: 'system',
             content: `あなたはManfrottoの日本公式サイト専門の商品アドバイザーです。
-必ずmanfrotto.com/jp-jaを検索して実在する商品を3点見つけてください。
 
 【重要なルール】
-- 実際にmanfrotto.com/jp-jaを検索すること
+- 必ず https://www.manfrotto.com/jp-ja/ を実際に検索して実在する商品を3点見つけること
+- 商品ページのURLは必ず https://www.manfrotto.com/jp-ja/ で始まること
 - 存在しない商品・URLは絶対に作らないこと
-- URLは必ず https://www.manfrotto.com/jp-ja/ で始まること
 - すべて日本語で回答すること
 
 【回答フォーマット】
-余分な説明は不要です。以下のJSON形式のみで回答してください：
+余分な説明不要。以下のJSON形式のみで回答してください：
 [
   {
     "name": "商品名",
@@ -71,18 +70,23 @@ export default async function handler(req, res) {
         products = JSON.parse(match[0]);
       }
     } catch (e) {
-      // JSON解析失敗の場合はそのまま返す
-      return res.status(200).json({ reply: `<div style="font-size:13px;line-height:1.9;white-space:pre-wrap">${raw}</div>` });
+      return res.status(200).json({
+        reply: `<div style="font-size:13px;line-height:1.9;white-space:pre-wrap">${raw}</div>`
+      });
     }
 
     if (!products || products.length === 0) {
-      return res.status(200).json({ reply: `<div style="font-size:13px;line-height:1.9;white-space:pre-wrap">${raw}</div>` });
+      return res.status(200).json({
+        reply: `<div style="font-size:13px;line-height:1.9;white-space:pre-wrap">${raw}</div>`
+      });
     }
 
     // HTMLに変換
     const html = products.map(p => `
 <div class="product">
-  <div class="product-img-wrap"><img src="/images/hero-tripod.png" alt="${p.name}"></div>
+  <div class="product-img-wrap">
+    <img src="/images/hero-tripod.png" alt="${p.name}">
+  </div>
   <div>
     <div class="product-name">${p.name}</div>
     <div class="product-sku">${p.sku}</div>
