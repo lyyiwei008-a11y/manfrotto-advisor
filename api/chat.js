@@ -28,7 +28,8 @@ export default async function handler(req, res) {
 【重要なルール】
 - 必ず https://www.manfrotto.com/jp-ja/ を実際に検索して実在する商品を3点見つけること
 - 商品ページのURLは必ず https://www.manfrotto.com/jp-ja/ で始まること
-- 存在しない商品・URLは絶対に作らないこと
+- 各商品の画像URLも必ず取得すること（manfrotto.comまたはcdn.manfrotto.comから）
+- 存在しない商品・URL・画像URLは絶対に作らないこと
 - すべて日本語で回答すること
 
 【回答フォーマット】
@@ -38,7 +39,8 @@ export default async function handler(req, res) {
     "name": "商品名",
     "sku": "型番",
     "reason": "推薦理由（2〜3文）",
-    "url": "https://www.manfrotto.com/jp-ja/..."
+    "url": "https://www.manfrotto.com/jp-ja/...",
+    "image": "https://cdn.manfrotto.com/media/catalog/product/..."
   },
   { ... },
   { ... }
@@ -61,7 +63,7 @@ export default async function handler(req, res) {
 
     const raw = data.choices?.[0]?.message?.content || '';
 
-    // JSONを抽出してHTMLに変換
+    // JSONを抽出
     let products = [];
     try {
       const clean = raw.replace(/```json|```/g, '').trim();
@@ -82,10 +84,13 @@ export default async function handler(req, res) {
     }
 
     // HTMLに変換
-    const html = products.map(p => `
+    const html = products.map(p => {
+      // 画像URLが取得できた場合はそれを使用、なければデフォルト画像
+      const imgSrc = p.image && p.image.startsWith('http') ? p.image : '/images/hero-tripod.png';
+      return `
 <div class="product">
   <div class="product-img-wrap">
-    <img src="/images/hero-tripod.png" alt="${p.name}">
+    <img src="${imgSrc}" alt="${p.name}" onerror="this.src='/images/hero-tripod.png'">
   </div>
   <div>
     <div class="product-name">${p.name}</div>
@@ -93,7 +98,8 @@ export default async function handler(req, res) {
     <div class="product-reason">${p.reason}</div>
     <a class="product-link" href="${p.url}" target="_blank">商品ページを見る →</a>
   </div>
-</div>`).join('');
+</div>`;
+    }).join('');
 
     res.status(200).json({ reply: html });
 
