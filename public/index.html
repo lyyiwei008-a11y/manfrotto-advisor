@@ -196,6 +196,38 @@ body {
 .typing-dot:nth-child(3) { animation-delay: 0.4s; }
 @keyframes typing { 0%,60%,100%{transform:translateY(0)} 30%{transform:translateY(-4px)} }
 
+/* OPTIONS BAR */
+.options-bar {
+  position: fixed;
+  bottom: 68px; left: 0; right: 0;
+  padding: 8px clamp(16px, 4vw, 40px);
+  display: none;
+  z-index: 49;
+  background: linear-gradient(to top, rgba(255,255,255,1) 60%, rgba(255,255,255,0));
+}
+.options-bar.visible { display: block; }
+.options-inner {
+  max-width: 800px;
+  margin: 0 auto;
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+.option-chip {
+  background: var(--white);
+  border: 1.5px solid var(--gray-200);
+  padding: 7px 16px;
+  font-family: 'Barlow', 'Noto Sans JP', sans-serif;
+  font-size: 13px;
+  cursor: pointer;
+  color: var(--gray-700);
+  transition: all 0.12s;
+  border-radius: 20px;
+  white-space: nowrap;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.08);
+}
+.option-chip:hover { border-color: var(--black); color: var(--black); background: var(--gray-100); }
+
 /* INPUT BAR */
 .input-bar {
   position: fixed; bottom: 0; left: 0; right: 0;
@@ -279,6 +311,10 @@ body {
     <div class="welcome-sub" id="welcome-sub">気になる製品カテゴリーや用途を教えてください。<br>最適なManfrotto製品をご提案します。</div>
     <div class="welcome-chips" id="welcome-chips"></div>
   </div>
+</div>
+
+<div class="options-bar" id="options-bar">
+  <div class="options-inner" id="options-inner"></div>
 </div>
 
 <div class="input-bar">
@@ -380,11 +416,34 @@ function sendQuick(text) {
   sendMessage();
 }
 
+function showOptions(options) {
+  const bar = document.getElementById('options-bar');
+  const inner = document.getElementById('options-inner');
+  inner.innerHTML = '';
+  if (!options || options.length === 0) {
+    bar.classList.remove('visible');
+    return;
+  }
+  options.forEach(opt => {
+    const chip = document.createElement('button');
+    chip.className = 'option-chip';
+    chip.textContent = opt;
+    chip.onclick = () => {
+      showOptions([]); // Clear options when one is selected
+      document.getElementById('input-field').value = opt;
+      sendMessage();
+    };
+    inner.appendChild(chip);
+  });
+  bar.classList.add('visible');
+}
+
 function resetChat() {
   history = [];
   isLoading = false;
   document.getElementById('send-btn').disabled = false;
   document.getElementById('reset-btn').classList.remove('visible');
+  showOptions([]);
   const chat = document.getElementById('chat');
   chat.innerHTML = `
     <div class="welcome" id="welcome">
@@ -532,18 +591,26 @@ async function sendMessage() {
     removeTyping();
     if (!res.ok) throw new Error(data.error || 'Error');
 
-    const reply = data.reply || '';
-    history.push({ role: 'assistant', content: reply });
+    const reply = data.reply;
 
-    const jsonMatch = reply.match(/\{"type":"products"[\s\S]*\}/);
-    if (jsonMatch) {
-      try {
-        appendMsg('bot', JSON.parse(jsonMatch[0]));
-      } catch {
-        appendMsg('bot', reply);
-      }
-    } else {
+    // Product recommendation
+    if (reply && reply.type === 'products') {
+      history.push({ role: 'assistant', content: JSON.stringify(reply) });
       appendMsg('bot', reply);
+      showOptions([]);
+    }
+    // Normal message with options
+    else if (reply && reply.message) {
+      history.push({ role: 'assistant', content: reply.message });
+      appendMsg('bot', reply.message);
+      showOptions(reply.options || []);
+    }
+    // Fallback
+    else {
+      const text = typeof reply === 'string' ? reply : '';
+      history.push({ role: 'assistant', content: text });
+      appendMsg('bot', text);
+      showOptions([]);
     }
   } catch (e) {
     removeTyping();
