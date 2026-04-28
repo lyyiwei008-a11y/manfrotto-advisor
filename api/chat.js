@@ -2,12 +2,25 @@ import fs from 'fs';
 import path from 'path';
 
 function detectCategory(messages) {
-  const text = messages.map(m => m.content).join(' ').toLowerCase();
-  if (/三脚|tripod|さんきゃく|ビデオ三脚/.test(text)) return 'tripods';
-  if (/バッグ|bag|かばん|鞄|ケース|backpack|pouch|ウエスト/.test(text)) return 'bags';
-  if (/雲台|ball head|fluid head|うんだい/.test(text)) return 'heads';
-  if (/一脚|monopod|いっきゃく/.test(text)) return 'monopods';
-  if (/照明|ライト|lighting|スタンド/.test(text)) return 'lighting';
+  // Use only the FIRST user message to detect category
+  // Later messages may contain category keywords from questions (e.g. "雲台が必要ですか？")
+  const firstUserMsg = messages.find(m => m.role === 'user')?.content?.toLowerCase() || '';
+  const allText = messages.map(m => m.content).join(' ').toLowerCase();
+
+  // Primary: check first message
+  if (/三脚|tripod|さんきゃく|ビデオ三脚/.test(firstUserMsg)) return 'tripods';
+  if (/バッグ|bag|かばん|鞄|ケース|backpack|pouch|ウエスト/.test(firstUserMsg)) return 'bags';
+  if (/雲台|ball head|fluid head|うんだい/.test(firstUserMsg)) return 'heads';
+  if (/一脚|monopod|いっきゃく/.test(firstUserMsg)) return 'monopods';
+  if (/照明|ライト|lighting|スタンド/.test(firstUserMsg)) return 'lighting';
+
+  // Fallback: check all messages (for cases where category comes later)
+  if (/三脚|tripod/.test(allText)) return 'tripods';
+  if (/バッグ|bag|backpack/.test(allText)) return 'bags';
+  if (/一脚|monopod/.test(allText)) return 'monopods'; // monopods before heads
+  if (/雲台|ball head|fluid head/.test(allText)) return 'heads';
+  if (/照明|ライト|lighting/.test(allText)) return 'lighting';
+
   return null;
 }
 
