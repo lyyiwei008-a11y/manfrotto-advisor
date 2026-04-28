@@ -44,7 +44,7 @@ body {
   z-index: 100;
 }
 .header-left { display: flex; align-items: center; gap: 14px; }
-.header-logo { height: 28px; width: auto; max-width: 160px; object-fit: contain; }
+.header-logo { height: 32px; width: auto; max-width: 180px; object-fit: contain; display: block; mix-blend-mode: multiply; }
 .header-divider { width: 1px; height: 16px; background: var(--gray-200); }
 .header-title {
   font-family: 'Barlow Condensed', sans-serif;
@@ -273,7 +273,6 @@ body {
 
 <div class="chat-container" id="chat">
   <div class="welcome" id="welcome">
-    <img class="welcome-logo" src="/images/manfrotto-logo.png" alt="Manfrotto">
     <div class="welcome-title" id="welcome-title">Find Your<br>Perfect Gear</div>
     <div class="welcome-sub" id="welcome-sub">気になる製品カテゴリーや用途を教えてください。<br>最適なManfrotto製品をご提案します。</div>
     <div class="welcome-chips" id="welcome-chips"></div>
@@ -387,7 +386,6 @@ function resetChat() {
   const chat = document.getElementById('chat');
   chat.innerHTML = `
     <div class="welcome" id="welcome">
-      <img class="welcome-logo" src="/images/manfrotto-logo.png" alt="Manfrotto">
       <div class="welcome-title" id="welcome-title"></div>
       <div class="welcome-sub" id="welcome-sub"></div>
       <div class="welcome-chips" id="welcome-chips"></div>
