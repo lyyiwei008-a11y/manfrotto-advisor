@@ -25,7 +25,7 @@ function getProductSample(category) {
     const items = Array.isArray(d) ? d : [...(d.photo||[]), ...(d.video||[])];
     return {
       count: items.length,
-      samples: items.slice(0, 8).map(p => `${p.name}（${p.sku}）`).join('\n')
+      samples: items.slice(0, 3).map(p => `${p.name}（${p.sku}）`).join('、')
     };
   } catch { return null; }
 }
@@ -133,12 +133,12 @@ function buildGuidancePrompt(lang, category) {
     ? '必ず日本語で回答してください。'
     : 'Always respond in English.';
 
-  // Get real product names to prove data exists
+  // Get real product samples to prove data exists
   const sample = category ? getProductSample(category) : null;
   const dataNote = sample
     ? (lang === 'ja'
-      ? `\n【絶対厳守】以下のManfrotto製品データベースが存在します（${sample.count}件）。「データがない」「取り扱いがない」は絶対に言わないでください：\n${sample.samples}\n（推薦はまだしないで、情報収集を続けてください）`
-      : `\n[MANDATORY] The following Manfrotto products ARE in your database (${sample.count} items):\n${sample.samples}\nNEVER say these products don't exist. Keep gathering info for now.`)
+      ? `\n【重要】データベースに${sample.count}件の製品があります：${sample.samples}\nこれらは実在するManfrotto製品です。絶対に「取り扱いがない」と言わないでください。`
+      : `\n[IMPORTANT] Database has ${sample.count} real products: ${sample.samples}\nNEVER say Manfrotto doesn't carry this product type.`)
     : '';
 
   const exampleJa = `{"message":"動画撮影がメインですね！使用されるカメラを教えてください。","options":["Sony","Canon","Nikon","Fujifilm","その他"]}`;
@@ -159,14 +159,10 @@ CAMERA WEIGHT: ${CAMERA_REF}
 
 Do NOT recommend products yet — keep gathering information.
 
-RESPONSE FORMAT — output ONLY this JSON, nothing else:
+RESPONSE FORMAT — strict JSON only, nothing else:
 {"message":"warm acknowledgment + one question","options":["opt1","opt2","opt3"]}
 
-⚠️ MANDATORY RULES:
-1. Output MUST be valid JSON only — no markdown, no extra text
-2. "options" array MUST contain 3-5 items — NEVER empty, NEVER omit
-3. Use the exact options shown after "→" in the flow above
-4. Each option must be short (under 12 characters)
+RULES: options array MUST always have 3-5 items. Use the options shown in the flow above.
 
 Example: ${lang === 'ja' ? exampleJa : exampleEn}`;
 }
@@ -251,7 +247,7 @@ export default async function handler(req, res) {
           { role: 'system', content: systemPrompt },
           ...messages
         ],
-        temperature: 0.1,
+        temperature: 0.2,
         max_tokens: 1000
       })
     });
@@ -268,20 +264,6 @@ export default async function handler(req, res) {
       parsed = match ? JSON.parse(match[0]) : null;
     } catch {
       parsed = null;
-    }
-
-    // If parse failed but we got text, wrap it with empty options
-    if (!parsed && raw) {
-      parsed = { message: raw.replace(/\*\*/g, ''), options: [] };
-    }
-
-    // If options is missing or empty, add default options based on category
-    if (parsed && !parsed.type && (!parsed.options || parsed.options.length === 0)) {
-      const defaultOptions = {
-        ja: { tripods: ['写真メイン','動画メイン','両方'], bags: ['バックパック','ショルダー','ウエスト'], heads: ['ボールヘッド','フルードヘッド','わからない'], monopods: ['スポーツ','動画','登山'], lighting: ['ポートレート','動画','商品撮影'] },
-        en: { tripods: ['Photo','Video','Both'], bags: ['Backpack','Shoulder','Waist'], heads: ['Ball head','Fluid head','Not sure'], monopods: ['Sports','Video','Hiking'], lighting: ['Portrait','Video','Product'] }
-      };
-      parsed.options = defaultOptions[lang]?.[category] || [];
     }
 
     // Enrich product prices from DB
