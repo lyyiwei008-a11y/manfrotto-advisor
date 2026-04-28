@@ -1,16 +1,82 @@
+import fs from 'fs';
+import path from 'path';
+
+// Detect category from conversation
+function detectCategory(messages) {
+  const text = messages.map(m => m.content).join(' ').toLowerCase();
+  if (/三脚|tripod|さんきゃく|video tripod|ビデオ三脚/.test(text)) return 'tripods';
+  if (/バッグ|bag|かばん|鞄|ケース|backpack/.test(text)) return 'bags';
+  if (/雲台|head|うんだい|ball head|fluid head/.test(text)) return 'heads';
+  if (/一脚|monopod|いっきゃく/.test(text)) return 'monopods';
+  if (/照明|ライト|light|スタンド|lighting/.test(text)) return 'lighting';
+  return null;
+}
+
+function loadJSON(filename) {
+  try {
+    const p = path.join(process.cwd(), 'public', 'data', filename);
+    return JSON.parse(fs.readFileSync(p, 'utf-8'));
+  } catch { return null; }
+}
+
+function loadCameras() {
+  try {
+    const p = path.join(process.cwd(), 'public', 'data', 'cameras.json');
+    return JSON.parse(fs.readFileSync(p, 'utf-8'));
+  } catch { return null; }
+}
+
 export default async function handler(req, res) {
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
-
   if (req.method === 'OPTIONS') return res.status(200).end();
   if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });
 
-  const { message } = req.body;
-  if (!message) return res.status(400).json({ error: 'No message provided' });
+  const { messages } = req.body;
+  if (!messages || !Array.isArray(messages)) {
+    return res.status(400).json({ error: 'No messages provided' });
+  }
+
+  // Load camera database always (for weight calculations)
+  const cameraData = loadCameras();
+
+  // Load product database based on detected category
+  const category = detectCategory(messages);
+  const productData = category ? loadJSON(`${category}.json`) : null;
+
+  // Build system prompt
+  const systemPrompt = `You are a professional Manfrotto product advisor for the Japanese market.
+Your goal is to have a natural conversation to understand the customer's needs, then recommend the best products from the database.
+
+CONVERSATION RULES:
+- Ask ONE question at a time
+- Be friendly and concise
+- Build on previous answers — never repeat questions already answered
+- After 3-5 exchanges when you have enough info, make your recommendation
+- If customer mentions a specific camera model, look it up in the camera database to get its weight
+
+LANGUAGE RULES:
+- If customer writes in Japanese → respond entirely in Japanese
+- If customer writes in English → respond entirely in English
+- Never mix languages
+
+CAMERA DATABASE:
+${cameraData ? JSON.stringify(cameraData.cameras, null, 0) : 'Not available'}
+
+WEIGHT SAFETY RULE:
+Always recommend tripods/heads/monopods with payload capacity = camera+lens total weight × 2 (safety factor)
+
+${productData ? `PRODUCT DATABASE (ONLY recommend products from this list — never invent products):
+${JSON.stringify(productData, null, 0)}` : `No product database loaded yet. Ask the customer what category they are looking for.`}
+
+RECOMMENDATION FORMAT:
+When ready to recommend, output ONLY this JSON (no text before or after, no markdown):
+{"type":"products","items":[{"name":"製品名","sku":"型番","reason":"推薦理由2〜3文","price":"希望小売価格（円）"}]}
+
+Recommend 3 to 5 products maximum. Only use products that exist in the PRODUCT DATABASE above.`;
 
   try {
-    // Step 1: Claude で商品を検索
     const response = await fetch('https://openrouter.ai/api/v1/chat/completions', {
       method: 'POST',
       headers: {
@@ -20,110 +86,24 @@ export default async function handler(req, res) {
         'X-Title': 'Manfrotto Product Advisor'
       },
       body: JSON.stringify({
-        model: 'anthropic/claude-haiku-4-5:online',
+        model: 'anthropic/claude-haiku-4-5',
         messages: [
-          {
-            role: 'system',
-            content: `あなたはManfrottoの日本公式サイト専門の商品アドバイザーです。
-
-【重要なルール】
-- 必ず https://www.manfrotto.com/jp-ja/ を実際に検索して実在する商品を3点見つけること
-- 商品ページのURLは必ず https://www.manfrotto.com/jp-ja/ で始まること
-- 存在しない商品・URLは絶対に作らないこと
-- すべて日本語で回答すること
-
-【回答フォーマット】
-余分な説明不要。以下のJSON形式のみで回答してください：
-[
-  {
-    "name": "商品名",
-    "sku": "型番",
-    "reason": "推薦理由（2〜3文）",
-    "url": "https://www.manfrotto.com/jp-ja/..."
-  },
-  { ... },
-  { ... }
-]`
-          },
-          {
-            role: 'user',
-            content: message
-          }
+          { role: 'system', content: systemPrompt },
+          ...messages
         ],
-        temperature: 0.2
+        temperature: 0.2,
+        max_tokens: 1500
       })
     });
 
     const data = await response.json();
-    if (!response.ok) throw new Error(data.error?.message || 'OpenRouter API error');
+    if (!response.ok) throw new Error(data.error?.message || 'API error');
 
-    const raw = data.choices?.[0]?.message?.content || '';
-
-    // Step 2: JSONを抽出
-    let products = [];
-    try {
-      const clean = raw.replace(/```json|```/g, '').trim();
-      const match = clean.match(/\[[\s\S]*\]/);
-      if (match) products = JSON.parse(match[0]);
-    } catch (e) {
-      return res.status(200).json({
-        reply: `<div style="font-size:13px;line-height:1.9;white-space:pre-wrap">${raw}</div>`
-      });
-    }
-
-    if (!products || products.length === 0) {
-      return res.status(200).json({
-        reply: `<div style="font-size:13px;line-height:1.9;white-space:pre-wrap">${raw}</div>`
-      });
-    }
-
-    // Step 3: 各商品ページから画像URLを取得
-    const productsWithImages = await Promise.all(products.map(async (p) => {
-      try {
-        const pageRes = await fetch(p.url, {
-          headers: { 'User-Agent': 'Mozilla/5.0' },
-          signal: AbortSignal.timeout(5000)
-        });
-        const html = await pageRes.text();
-
-        // og:image メタタグから画像URLを取得
-        const ogMatch = html.match(/<meta[^>]*property=["']og:image["'][^>]*content=["']([^"']+)["']/i)
-                     || html.match(/<meta[^>]*content=["']([^"']+)["'][^>]*property=["']og:image["']/i);
-
-        if (ogMatch && ogMatch[1]) {
-          p.image = ogMatch[1];
-        } else {
-          // cdn.manfrotto.com の画像を探す
-          const cdnMatch = html.match(/https:\/\/cdn\.manfrotto\.com\/media\/catalog\/product[^"'\s]+\.(jpg|png|webp)/i);
-          if (cdnMatch) p.image = cdnMatch[0];
-        }
-      } catch (e) {
-        // 画像取得失敗は無視、デフォルト画像を使用
-      }
-      return p;
-    }));
-
-    // Step 4: HTMLに変換
-    const html = productsWithImages.map(p => {
-      const imgSrc = p.image && p.image.startsWith('http') ? p.image : '/images/hero-tripod.png';
-      return `
-<div class="product">
-  <div class="product-img-wrap">
-    <img src="${imgSrc}" alt="${p.name}" onerror="this.src='/images/hero-tripod.png'">
-  </div>
-  <div>
-    <div class="product-name">${p.name}</div>
-    <div class="product-sku">${p.sku}</div>
-    <div class="product-reason">${p.reason}</div>
-    <a class="product-link" href="${p.url}" target="_blank">商品ページを見る →</a>
-  </div>
-</div>`;
-    }).join('');
-
-    res.status(200).json({ reply: html });
+    const reply = data.choices?.[0]?.message?.content || '';
+    res.status(200).json({ reply, category });
 
   } catch (error) {
-    console.error('Error:', error);
-    res.status(500).json({ error: error.message || 'Internal server error' });
+    console.error(error);
+    res.status(500).json({ error: error.message });
   }
 }
