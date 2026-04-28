@@ -151,7 +151,23 @@ Do NOT recommend products yet — just gather information through conversation.
 RESPONSE FORMAT (strict JSON only, no text outside):
 {"message":"Your warm response + next question","options":["choice1","choice2","choice3","choice4"]}
 
-Options: 3-5 short choices matching your question. Match customer's language.
+CRITICAL RULES FOR options:
+- options MUST ALWAYS be provided — NEVER return empty options []
+- Always provide 3-5 SHORT choices (under 12 characters each)
+- Options must directly answer your question
+- Match customer's language (Japanese or English)
+
+OPTIONS EXAMPLES per question type:
+- セット or 単体？ → ["三脚のみ", "雲台セット"]
+- 写真 or 動画？ → ["写真メイン", "動画メイン", "両方"]
+- 素材は？ → ["カーボン", "アルミ", "こだわらない"]
+- 三脚持ち歩く？ → ["持ち歩かない", "小型三脚", "大型三脚"]
+- PCは？ → ["持ち歩かない", "13インチ以下", "15インチ", "16インチ以上"]
+- シーンは？ → ["旅行・登山", "街撮り", "スタジオ", "スポーツ"]
+- カメラは？ → ["Sony", "Canon", "Nikon", "Fujifilm", "その他"]
+- タイプは？ → ["バックパック", "ショルダー", "ウエスト", "ローラー"]
+- 雲台は？ → ["必要", "不要", "持っている"]
+- 自立は？ → ["必要", "不要", "あれば嬉しい"]
 
 Example: ${responseExample}`;
 }
