@@ -284,13 +284,94 @@ export default async function handler(req, res) {
       parsed = { message: raw.replace(/\*\*/g, ''), options: [] };
     }
 
-    // If options is missing or empty, add default options based on category
+    // Smart fallback options based on current conversation turn
     if (parsed && !parsed.type && (!parsed.options || parsed.options.length === 0)) {
-      const defaultOptions = {
-        ja: { tripods: ['写真メイン','動画メイン','両方'], bags: ['バックパック','ショルダー','ウエスト'], heads: ['ボールヘッド','フルードヘッド','わからない'], monopods: ['スポーツ','動画','登山'], lighting: ['ポートレート','動画','商品撮影'] },
-        en: { tripods: ['Photo','Video','Both'], bags: ['Backpack','Shoulder','Waist'], heads: ['Ball head','Fluid head','Not sure'], monopods: ['Sports','Video','Hiking'], lighting: ['Portrait','Video','Product'] }
+      const turn = userMessages.length; // which step we're on
+      const fallbacks = {
+        ja: {
+          tripods: [
+            ['三脚のみ','雲台セット'],
+            ['写真メイン','動画メイン','両方'],
+            ['Sony','Canon','Nikon','Fujifilm','その他'],
+            ['カーボン','アルミ','こだわらない'],
+            ['旅行・登山','街撮り','スタジオ','スポーツ']
+          ],
+          bags: [
+            ['バックパック','ショルダー','ウエスト','ローラー'],
+            ['1台+レンズ1〜2本','1台+レンズ3〜4本','2台以上'],
+            ['標準ズーム','70-200mm','超望遠','シネレンズ'],
+            ['機材のみ','少し','普段使いも'],
+            ['旅行・登山','街撮り','プロ撮影','動画']
+          ],
+          heads: [
+            ['ボールヘッド','フルードヘッド','3ウェイ','ギア','わからない'],
+            ['写真メイン','動画メイン','両方'],
+            ['〜2kg','2〜5kg','5〜10kg','10kg以上'],
+            ['素早い架設','精密な調整','こだわらない'],
+            ['Manfrotto三脚','他社三脚','これから購入']
+          ],
+          monopods: [
+            ['スポーツ・報道','動画・走り撮り','登山・旅行','野鳥・望遠'],
+            ['〜1.5kg','〜2.5kg','〜5kg','〜8kg'],
+            ['一脚のみ','雲台セット','既に持っている'],
+            ['必要','不要','あれば嬉しい'],
+            ['レバー式','ナット式','こだわらない'],
+            ['カーボン','アルミ','こだわらない']
+          ],
+          lighting: [
+            ['ポートレート','動画・YouTube','商品撮影','屋外ロケ'],
+            ['ストロボ','LED','リングライト','大型モノブロック'],
+            ['スタンドも欲しい','既に持っている','アクセサリーのみ'],
+            ['スタジオ固定','自宅・小スペース','屋外','卓上'],
+            ['必要','不要','わからない'],
+            ['必要','不要']
+          ]
+        },
+        en: {
+          tripods: [
+            ['Tripod only','With head set'],
+            ['Mainly photo','Mainly video','Both'],
+            ['Sony','Canon','Nikon','Fujifilm','Other'],
+            ['Carbon','Aluminum','No preference'],
+            ['Travel/hiking','Street','Studio','Sports']
+          ],
+          bags: [
+            ['Backpack','Shoulder bag','Waist bag','Roller bag'],
+            ['1 body + 1-2 lenses','1 body + 3-4 lenses','2+ bodies'],
+            ['Standard zoom','70-200mm','Super telephoto','Cine lens'],
+            ['Gear only','A little','Everyday use too'],
+            ['Travel/hiking','Street','Professional','Video']
+          ],
+          heads: [
+            ['Ball head','Fluid head','3-way','Gear head','Not sure'],
+            ['Mainly photo','Mainly video','Both'],
+            ['~2kg','2-5kg','5-10kg','10kg+'],
+            ['Quick setup','Precise adjustment','No preference'],
+            ['Manfrotto tripod','Other brand','Not yet purchased']
+          ],
+          monopods: [
+            ['Sports & news','Video & run','Hiking & travel','Wildlife & tele'],
+            ['~1.5kg','~2.5kg','~5kg','~8kg'],
+            ['Monopod only','With head','Already have one'],
+            ['Yes needed','Not needed','Nice to have'],
+            ['Lever lock','Twist lock','No preference'],
+            ['Carbon','Aluminum','No preference']
+          ],
+          lighting: [
+            ['Portrait','Video & YouTube','Product','Outdoor'],
+            ['Strobe','LED','Ring light','Large monoblock'],
+            ['Need stand','Already have','Accessories only'],
+            ['Studio fixed','Home small space','Outdoor','Desktop'],
+            ['Yes needed','Not needed','Not sure'],
+            ['Yes needed','Not needed']
+          ]
+        }
       };
-      parsed.options = defaultOptions[lang]?.[category] || [];
+      const catFallbacks = fallbacks[lang]?.[category];
+      if (catFallbacks) {
+        const idx = Math.min(turn - 1, catFallbacks.length - 1);
+        parsed.options = catFallbacks[idx] || [];
+      }
     }
 
     // Enrich product prices from DB
