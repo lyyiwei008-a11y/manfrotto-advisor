@@ -172,9 +172,18 @@ function buildRecommendPrompt(lang, category, messages) {
   const cameraData = loadMini('cameras.json');
   const summary = messages.filter(m => m.role === 'user').map(m => m.content).join(' / ');
   const langRule = lang === 'ja' ? '必ず日本語で回答してください。' : 'Always respond in English.';
-  const itemCount = productData
-    ? (Array.isArray(productData) ? productData.length : Object.values(productData).flat().length)
-    : 0;
+
+  // Normalize product data to array
+  let productList = [];
+  if (productData) {
+    if (Array.isArray(productData)) {
+      productList = productData;
+    } else {
+      productList = [...(productData.photo||[]), ...(productData.video||[])];
+    }
+  }
+
+  console.log(`[RECOMMEND] category:${category} products:${productList.length}`);
 
   return `You are a Manfrotto product advisor. Recommend products from the database below.
 ${langRule}
@@ -183,15 +192,16 @@ CUSTOMER NEEDS: ${summary}
 
 CAMERA DATABASE: ${cameraData ? JSON.stringify(cameraData.cameras) : ''}
 
-PRODUCT DATABASE (${itemCount} products — recommend ONLY from this list):
-${productData ? JSON.stringify(productData) : 'No data'}
+PRODUCT DATABASE — ${productList.length} real products (recommend ONLY from this list, never invent):
+${JSON.stringify(productList)}
 
 WEIGHT SAFETY: payload_kg ≥ (camera + lens weight) × 2
 
 RESPONSE FORMAT — strict JSON only:
 {"type":"products","message":"intro text","items":[{"name":"製品名","sku":"型番","reason":"推薦理由2〜3文"}]}
 
-Recommend 3-5 products. Never invent products not in the database.`;
+Recommend 3-5 products. If no perfect match exists, recommend the closest options from the list.
+Never return empty items array — always recommend something from the database.`;
 }
 
 export default async function handler(req, res) {
@@ -210,10 +220,10 @@ export default async function handler(req, res) {
   const userMessages = messages.filter(m => m.role === 'user');
   const lastUserMsg = userMessages[userMessages.length - 1]?.content || '';
 
-  const recommendSignals = /以上です|おすすめ|推薦|recommend|that'?s all|決めて|お願い|please|show me|suggest/i;
+  const recommendSignals = /以上です|おすすめして|推薦して|お願いします|please recommend|show me products|suggest products/i;
   const shouldRecommend = category &&
-    userMessages.length >= 4 &&
-    (userMessages.length >= 6 || recommendSignals.test(lastUserMsg));
+    userMessages.length >= 5 &&
+    (userMessages.length >= 7 || recommendSignals.test(lastUserMsg));
 
   const phase = shouldRecommend ? 'RECOMMEND' : 'GUIDE';
   const systemPrompt = shouldRecommend
