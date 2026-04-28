@@ -1,7 +1,6 @@
 import fs from 'fs';
 import path from 'path';
 
-// Detect category from conversation
 function detectCategory(messages) {
   const text = messages.map(m => m.content).join(' ').toLowerCase();
   if (/三脚|tripod|さんきゃく|video tripod|ビデオ三脚/.test(text)) return 'tripods';
@@ -19,13 +18,6 @@ function loadJSON(filename) {
   } catch { return null; }
 }
 
-function loadCameras() {
-  try {
-    const p = path.join(process.cwd(), 'public', 'data', 'cameras.json');
-    return JSON.parse(fs.readFileSync(p, 'utf-8'));
-  } catch { return null; }
-}
-
 export default async function handler(req, res) {
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
@@ -38,16 +30,12 @@ export default async function handler(req, res) {
     return res.status(400).json({ error: 'No messages provided' });
   }
 
-  // Load camera database always (for weight calculations)
-  const cameraData = loadCameras();
-
-  // Load product database based on detected category
+  const cameraData = loadJSON('cameras.json');
   const category = detectCategory(messages);
   const productData = category ? loadJSON(`${category}.json`) : null;
 
-  // Build system prompt
   const systemPrompt = `You are a professional Manfrotto product advisor for the Japanese market.
-Your goal is to have a natural conversation to understand the customer's needs, then recommend the best products from the database.
+Your goal is to have a natural conversation to understand the customer's needs, then recommend the best products.
 
 CONVERSATION RULES:
 - Ask ONE question at a time
@@ -65,16 +53,35 @@ CAMERA DATABASE:
 ${cameraData ? JSON.stringify(cameraData.cameras, null, 0) : 'Not available'}
 
 WEIGHT SAFETY RULE:
-Always recommend tripods/heads/monopods with payload capacity = camera+lens total weight × 2 (safety factor)
+Always recommend tripods/heads/monopods with payload capacity = camera+lens total weight × 2
 
-${productData ? `PRODUCT DATABASE (ONLY recommend products from this list — never invent products):
-${JSON.stringify(productData, null, 0)}` : `No product database loaded yet. Ask the customer what category they are looking for.`}
+${productData ? `PRODUCT DATABASE (ONLY recommend products from this list):
+${JSON.stringify(productData, null, 0)}` : 'No product database loaded yet. Ask the customer what category they need.'}
 
-RECOMMENDATION FORMAT:
-When ready to recommend, output ONLY this JSON (no text before or after, no markdown):
-{"type":"products","items":[{"name":"製品名","sku":"型番","reason":"推薦理由2〜3文","price":"希望小売価格（円）"}]}
+RESPONSE FORMAT:
+Every response MUST be a JSON object with this exact structure (no text before or after):
+{
+  "message": "Your conversational response here",
+  "options": ["option1", "option2", "option3"]
+}
 
-Recommend 3 to 5 products maximum. Only use products that exist in the PRODUCT DATABASE above.`;
+RULES FOR options:
+- Always provide 3-5 short, clickable options relevant to your question
+- Options should be concise (under 15 characters each)
+- Options should match the language of the message (Japanese or English)
+- When recommending products, use empty options array: []
+
+RULES FOR products recommendation:
+When ready to recommend products, use this format instead:
+{
+  "type": "products",
+  "message": "Based on your needs, here are my recommendations:",
+  "items": [
+    {"name": "製品名", "sku": "型番", "reason": "推薦理由2〜3文", "price": "希望小売価格"}
+  ]
+}
+
+Only recommend 3-5 products that exist in the PRODUCT DATABASE. Never invent products.`;
 
   try {
     const response = await fetch('https://openrouter.ai/api/v1/chat/completions', {
@@ -99,8 +106,24 @@ Recommend 3 to 5 products maximum. Only use products that exist in the PRODUCT D
     const data = await response.json();
     if (!response.ok) throw new Error(data.error?.message || 'API error');
 
-    const reply = data.choices?.[0]?.message?.content || '';
-    res.status(200).json({ reply, category });
+    const raw = data.choices?.[0]?.message?.content || '';
+
+    // Parse JSON response
+    let parsed;
+    try {
+      const clean = raw.replace(/```json|```/g, '').trim();
+      const match = clean.match(/\{[\s\S]*\}/);
+      parsed = match ? JSON.parse(match[0]) : null;
+    } catch {
+      parsed = null;
+    }
+
+    if (parsed) {
+      res.status(200).json({ reply: parsed, category });
+    } else {
+      // Fallback: return raw text with no options
+      res.status(200).json({ reply: { message: raw, options: [] }, category });
+    }
 
   } catch (error) {
     console.error(error);
