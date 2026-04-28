@@ -44,7 +44,7 @@ body {
   z-index: 100;
 }
 .header-left { display: flex; align-items: center; gap: 14px; }
-.header-logo { height: 22px; width: auto; }
+.header-logo { height: 28px; width: auto; max-width: 160px; object-fit: contain; }
 .header-divider { width: 1px; height: 16px; background: var(--gray-200); }
 .header-title {
   font-family: 'Barlow Condensed', sans-serif;
@@ -54,7 +54,22 @@ body {
   text-transform: uppercase;
   color: var(--gray-400);
 }
-.lang-toggle { display: flex; border: 1px solid var(--gray-200); overflow: hidden; }
+.reset-btn {
+  background: none;
+  border: 1px solid var(--gray-200);
+  padding: 5px 12px;
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  cursor: pointer;
+  color: var(--gray-400);
+  transition: all 0.15s;
+  display: none;
+}
+.reset-btn:hover { border-color: var(--black); color: var(--black); }
+.reset-btn.visible { display: block; }
 .lang-btn {
   background: none; border: none;
   padding: 5px 12px;
@@ -247,9 +262,12 @@ body {
     <div class="header-divider"></div>
     <span class="header-title">Product Advisor</span>
   </div>
-  <div class="lang-toggle">
-    <button class="lang-btn active" onclick="setLang('ja')">日本語</button>
-    <button class="lang-btn" onclick="setLang('en')">English</button>
+  <div class="header-right" style="display:flex;align-items:center;gap:10px">
+    <button class="reset-btn" id="reset-btn" onclick="resetChat()">← やり直す</button>
+    <div class="lang-toggle">
+      <button class="lang-btn active" onclick="setLang('ja')">日本語</button>
+      <button class="lang-btn" onclick="setLang('en')">English</button>
+    </div>
   </div>
 </header>
 
@@ -361,9 +379,28 @@ function sendQuick(text) {
   sendMessage();
 }
 
+function resetChat() {
+  history = [];
+  isLoading = false;
+  document.getElementById('send-btn').disabled = false;
+  document.getElementById('reset-btn').classList.remove('visible');
+  const chat = document.getElementById('chat');
+  chat.innerHTML = `
+    <div class="welcome" id="welcome">
+      <img class="welcome-logo" src="/images/manfrotto-logo.png" alt="Manfrotto">
+      <div class="welcome-title" id="welcome-title"></div>
+      <div class="welcome-sub" id="welcome-sub"></div>
+      <div class="welcome-chips" id="welcome-chips"></div>
+    </div>`;
+  setLang(lang);
+}
+
 function hideWelcome() {
   const w = document.getElementById('welcome');
-  if (w) w.remove();
+  if (w) {
+    w.remove();
+    document.getElementById('reset-btn').classList.add('visible');
+  }
 }
 
 function appendMsg(role, content) {
