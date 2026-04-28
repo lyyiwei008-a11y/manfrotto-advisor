@@ -1,23 +1,95 @@
 import fs from 'fs';
 import path from 'path';
 
+// ── Category detection ──
 function detectCategory(messages) {
   const text = messages.map(m => m.content).join(' ').toLowerCase();
-  if (/三脚|tripod|さんきゃく|video tripod|ビデオ三脚/.test(text)) return 'tripods';
+  if (/三脚|tripod|さんきゃく|ビデオ三脚/.test(text)) return 'tripods';
   if (/バッグ|bag|かばん|鞄|ケース|backpack/.test(text)) return 'bags';
-  if (/雲台|head|うんだい|ball head|fluid head/.test(text)) return 'heads';
+  if (/雲台|ball head|fluid head|うんだい/.test(text)) return 'heads';
   if (/一脚|monopod|いっきゃく/.test(text)) return 'monopods';
-  if (/照明|ライト|light|スタンド|lighting/.test(text)) return 'lighting';
+  if (/照明|ライト|lighting|スタンド/.test(text)) return 'lighting';
   return null;
 }
 
-function loadJSON(filename) {
+// ── Check if ready to recommend ──
+function isReadyToRecommend(messages) {
+  // Need at least 3 user messages and category detected
+  const userMsgs = messages.filter(m => m.role === 'user');
+  return userMsgs.length >= 3;
+}
+
+// ── Load mini data ──
+function loadMini(filename) {
   try {
-    const p = path.join(process.cwd(), 'public', 'data', filename);
+    const p = path.join(process.cwd(), 'public', 'data', 'mini', filename);
     return JSON.parse(fs.readFileSync(p, 'utf-8'));
   } catch { return null; }
 }
 
+// ── System prompts ──
+
+// Phase 1: Guidance only — NO product data (very cheap)
+function buildGuidancePrompt(lang) {
+  return `You are a professional Manfrotto product advisor for the Japanese market.
+Your goal is to understand the customer's needs through natural conversation.
+
+CONVERSATION RULES:
+- Ask ONE question at a time — never ask multiple questions at once
+- Be friendly and concise
+- Build on previous answers — never repeat questions already answered
+- Detect the product category from the customer's message
+- Ask about: category → purpose (photo/video) → equipment weight → scene → preferences
+- Do NOT recommend products yet — just gather information
+
+LANGUAGE: Match the customer's language exactly (Japanese or English)
+
+CAMERA WEIGHT REFERENCE (use when customer mentions camera model):
+Sony: α7IV=659g, α7C=509g, α6700=493g, FX3=715g
+Canon: R6II=670g, R5II=910g, R50=375g, C70=1010g
+Nikon: Z6III=760g, Z8=910g, Z9=1340g, D850=1005g
+Fujifilm: X-T5=557g, X-H2=660g, X100VI=521g
+Ricoh: GRIV=275g, GRIIIx=262g
+
+RESPONSE FORMAT (strict JSON, no text before/after):
+{"message":"Your question here","options":["option1","option2","option3"]}
+
+Options should be short (under 12 chars), relevant to your question, in customer's language.`;
+}
+
+// Phase 2: Recommendation with product data
+function buildRecommendPrompt(category, messages) {
+  const productData = category ? loadMini(`${category}.json`) : null;
+  const cameraData = loadMini('cameras.json');
+
+  // Build conversation summary
+  const summary = messages
+    .filter(m => m.role === 'user')
+    .map(m => m.content)
+    .join(' / ');
+
+  return `You are a professional Manfrotto product advisor.
+Based on the conversation, recommend the best products from the database below.
+
+CUSTOMER NEEDS SUMMARY: ${summary}
+
+WEIGHT SAFETY RULE: Recommend payload_kg ≥ (camera+lens weight) × 2
+
+CAMERA DATABASE:
+${cameraData ? JSON.stringify(cameraData.cameras) : ''}
+
+PRODUCT DATABASE (only recommend from this list):
+${productData ? JSON.stringify(productData) : 'No data available'}
+
+LANGUAGE: Match the customer's language (Japanese or English)
+
+RESPONSE FORMAT (strict JSON, no text before/after):
+{"type":"products","message":"Intro text","items":[{"name":"製品名","sku":"型番","reason":"推薦理由2〜3文","price":"価格"}]}
+
+Recommend 3-5 products only. Never invent products not in the database.`;
+}
+
+// ── Main handler ──
 export default async function handler(req, res) {
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
@@ -30,58 +102,29 @@ export default async function handler(req, res) {
     return res.status(400).json({ error: 'No messages provided' });
   }
 
-  const cameraData = loadJSON('cameras.json');
   const category = detectCategory(messages);
-  const productData = category ? loadJSON(`${category}.json`) : null;
+  const userMessages = messages.filter(m => m.role === 'user');
+  const lastUserMsg = userMessages[userMessages.length - 1]?.content || '';
 
-  const systemPrompt = `You are a professional Manfrotto product advisor for the Japanese market.
-Your goal is to have a natural conversation to understand the customer's needs, then recommend the best products.
+  // Decide phase: guidance or recommendation
+  // Switch to recommendation when:
+  // 1. Category detected AND
+  // 2. 3+ user messages AND
+  // 3. Last message contains a signal to recommend
+  const recommendSignals = /以上です|それで|おすすめ|推薦|recommend|that's all|決めて|お願い/i;
+  const shouldRecommend = category &&
+    userMessages.length >= 3 &&
+    (userMessages.length >= 5 || recommendSignals.test(lastUserMsg));
 
-CONVERSATION RULES:
-- Ask ONE question at a time
-- Be friendly and concise
-- Build on previous answers — never repeat questions already answered
-- After 3-5 exchanges when you have enough info, make your recommendation
-- If customer mentions a specific camera model, look it up in the camera database to get its weight
+  const lang = /[^\x00-\x7F]/.test(lastUserMsg) ? 'ja' : 'en';
+  const systemPrompt = shouldRecommend
+    ? buildRecommendPrompt(category, messages)
+    : buildGuidancePrompt(lang);
 
-LANGUAGE RULES:
-- If customer writes in Japanese → respond entirely in Japanese
-- If customer writes in English → respond entirely in English
-- Never mix languages
-
-CAMERA DATABASE:
-${cameraData ? JSON.stringify(cameraData.cameras, null, 0) : 'Not available'}
-
-WEIGHT SAFETY RULE:
-Always recommend tripods/heads/monopods with payload capacity = camera+lens total weight × 2
-
-${productData ? `PRODUCT DATABASE (ONLY recommend products from this list):
-${JSON.stringify(productData, null, 0)}` : 'No product database loaded yet. Ask the customer what category they need.'}
-
-RESPONSE FORMAT:
-Every response MUST be a JSON object with this exact structure (no text before or after):
-{
-  "message": "Your conversational response here",
-  "options": ["option1", "option2", "option3"]
-}
-
-RULES FOR options:
-- Always provide 3-5 short, clickable options relevant to your question
-- Options should be concise (under 15 characters each)
-- Options should match the language of the message (Japanese or English)
-- When recommending products, use empty options array: []
-
-RULES FOR products recommendation:
-When ready to recommend products, use this format instead:
-{
-  "type": "products",
-  "message": "Based on your needs, here are my recommendations:",
-  "items": [
-    {"name": "製品名", "sku": "型番", "reason": "推薦理由2〜3文", "price": "希望小売価格"}
-  ]
-}
-
-Only recommend 3-5 products that exist in the PRODUCT DATABASE. Never invent products.`;
+  // Cost logging
+  const phase = shouldRecommend ? 'RECOMMEND' : 'GUIDE';
+  const promptTokens = Math.ceil(systemPrompt.length / 4);
+  console.log(`[${phase}] category:${category} userMsgs:${userMessages.length} promptTokens:~${promptTokens}`);
 
   try {
     const response = await fetch('https://openrouter.ai/api/v1/chat/completions', {
@@ -90,7 +133,7 @@ Only recommend 3-5 products that exist in the PRODUCT DATABASE. Never invent pro
         'Authorization': `Bearer ${process.env.OPENROUTER_API_KEY}`,
         'Content-Type': 'application/json',
         'HTTP-Referer': 'https://manfrotto-advisor.vercel.app',
-        'X-Title': 'Manfrotto Product Advisor'
+        'X-Title': 'Manfrotto Advisor'
       },
       body: JSON.stringify({
         model: 'anthropic/claude-haiku-4-5',
@@ -99,7 +142,7 @@ Only recommend 3-5 products that exist in the PRODUCT DATABASE. Never invent pro
           ...messages
         ],
         temperature: 0.2,
-        max_tokens: 1500
+        max_tokens: 1000
       })
     });
 
@@ -118,12 +161,11 @@ Only recommend 3-5 products that exist in the PRODUCT DATABASE. Never invent pro
       parsed = null;
     }
 
-    if (parsed) {
-      res.status(200).json({ reply: parsed, category });
-    } else {
-      // Fallback: return raw text with no options
-      res.status(200).json({ reply: { message: raw, options: [] }, category });
-    }
+    res.status(200).json({
+      reply: parsed || { message: raw, options: [] },
+      phase,
+      category
+    });
 
   } catch (error) {
     console.error(error);
