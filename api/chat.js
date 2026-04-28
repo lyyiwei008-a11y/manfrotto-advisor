@@ -125,12 +125,21 @@ function buildGuidancePrompt(lang, category) {
     ? '必ず日本語で回答してください。'
     : 'Always respond in English.';
 
+  // Check if we have data for this category
+  const hasData = category ? !!loadMini(`${category}.json`) : false;
+  const dataConfirm = category && hasData
+    ? (lang === 'ja'
+      ? `\nCONFIRMED: あなたは「${category}」カテゴリーの製品データベースを持っています。絶対に「データがない」「取り扱いがない」とは言わないでください。`
+      : `\nCONFIRMED: You HAVE product data for "${category}" category in your database. NEVER say you don't have this product type.`)
+    : '';
+
   const responseExample = lang === 'ja'
-    ? `{"message":"動画撮影がメインですね！次に、使用されるカメラ機種を教えていただけますか？カメラの重さによって必要な耐荷重が変わります。","options":["Sony α7","Canon R6","Nikon Z6","ビデオカメラ"]}`
-    : `{"message":"Great, mainly for video! Could you tell me which camera you use? The weight determines the payload we need.","options":["Sony α7","Canon R6","Nikon Z6","Video camera"]}`;
+    ? `{"message":"動画撮影がメインですね！次に、使用されるカメラ機種を教えていただけますか？","options":["Sony α7","Canon R6","Nikon Z6","ビデオカメラ"]}`
+    : `{"message":"Great, mainly for video! Which camera do you use?","options":["Sony α7","Canon R6","Nikon Z6","Video camera"]}`;
 
   return `You are a friendly and knowledgeable Manfrotto product advisor.
 ${langRule}
+${dataConfirm}
 
 CONVERSATION STYLE:
 - Always acknowledge the customer's answer warmly before asking the next question
