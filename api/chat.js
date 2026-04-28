@@ -4,7 +4,7 @@ import path from 'path';
 function detectCategory(messages) {
   const text = messages.map(m => m.content).join(' ').toLowerCase();
   if (/三脚|tripod|さんきゃく|ビデオ三脚/.test(text)) return 'tripods';
-  if (/バッグ|bag|かばん|鞄|ケース|backpack/.test(text)) return 'bags';
+  if (/バッグ|bag|かばん|鞄|ケース|backpack|pouch|ウエスト/.test(text)) return 'bags';
   if (/雲台|ball head|fluid head|うんだい/.test(text)) return 'heads';
   if (/一脚|monopod|いっきゃく/.test(text)) return 'monopods';
   if (/照明|ライト|lighting|スタンド/.test(text)) return 'lighting';
@@ -18,202 +18,180 @@ function loadMini(filename) {
   } catch { return null; }
 }
 
-// ── Category-specific guidance flows ──
+function getProductSample(category) {
+  try {
+    const d = loadMini(`${category}.json`);
+    if (!d) return null;
+    const items = Array.isArray(d) ? d : [...(d.photo||[]), ...(d.video||[])];
+    return {
+      count: items.length,
+      samples: items.slice(0, 3).map(p => `${p.name}（${p.sku}）`).join('、')
+    };
+  } catch { return null; }
+}
+
 const FLOWS = {
   ja: {
-    tripods: `【三脚の質問フロー】以下の順番で1つずつ質問してください：
-1. 「三脚のみ」か「雲台セット」かを確認
-2. 「写真メイン」「動画メイン」「両方」を確認
-3. 使用機材を確認（カメラ機種 or 重量目安）→ 耐荷重計算のため必須
-4. 動画の場合のみ：パン/チルトの滑らかさ、カウンターバランスの必要性を確認
-5. 素材（カーボン/アルミ）の希望を確認
-6. 撮影シーン（登山/旅行/スタジオ/スポーツ等）を確認`,
+    tripods: `【三脚の質問フロー】この順番で1つずつ質問：
+1. 「三脚のみ」か「雲台セット」かを確認 → options:["三脚のみ","雲台セット"]
+2. 用途を確認 → options:["写真メイン","動画メイン","両方"]
+3. 使用機材を確認 → options:["Sony","Canon","Nikon","Fujifilm","その他"]
+4. 動画の場合：パン/チルトのこだわりを確認 → options:["滑らかさ重視","素早い操作","こだわらない"]
+5. 素材を確認 → options:["カーボン","アルミ","こだわらない"]
+6. 撮影シーンを確認 → options:["旅行・登山","街撮り","スタジオ","スポーツ"]`,
 
-    bags: `【カメラバッグの質問フロー】以下の順番で1つずつ質問してください：
-1. バッグタイプ（バックパック/ショルダー/ウエストポーチ/ローラーバッグ）を確認
-2. 「今回の撮影で持ち出す機材」を確認（所有台数ではなく実際の持ち出し量）
-3. 一番大きいレンズを確認（70-200mm f/2.8が入るかが重要な分岐点）
-4. 個人荷物の量（機材のみ/少し/普段使いも）を確認 → 普段使いの場合はPC サイズも確認
-5. 三脚を一緒に持ち歩くか確認（小型/大型）
-6. 主な使用シーン（旅行/街撮り/プロ撮影/動画）を確認`,
+    bags: `【カメラバッグの質問フロー】この順番で1つずつ質問：
+1. バッグタイプを確認 → options:["バックパック","ショルダー","ウエスト","ローラー"]
+2. 持ち出し機材を確認 → options:["1台+レンズ1〜2本","1台+レンズ3〜4本","2台以上"]
+3. 最大レンズサイズを確認 → options:["標準ズーム","70-200mm","超望遠","シネレンズ"]
+4. 個人荷物の量を確認 → options:["機材のみ","少し","普段使いも"]
+5. 三脚を持ち歩くか確認 → options:["持ち歩かない","小型三脚","大型三脚"]
+6. 使用シーンを確認 → options:["旅行・登山","街撮り","プロ撮影","動画"]`,
 
-    heads: `【雲台の質問フロー】以下の順番で1つずつ質問してください：
-1. 雲台タイプ（ボールヘッド/フルードヘッド/3ウェイ/ギア）が決まっているか確認
-2. 主な撮影（写真/動画/両方）を確認
-3. 使用機材の重量を確認（カメラ機種 or 重量目安）
-4. 動画の場合：パン/チルトの滑らかさ、カウンターバランスの必要性を確認
-5. 設置スピードの優先度（素早い架設/精密な調整）を確認
-6. 既存の三脚との組み合わせ（Manfrotto/他社/これから購入）を確認`,
+    heads: `【雲台の質問フロー】この順番で1つずつ質問：
+1. 雲台タイプを確認 → options:["ボールヘッド","フルードヘッド","3ウェイ","ギア","わからない"]
+2. 用途を確認 → options:["写真メイン","動画メイン","両方"]
+3. 機材重量を確認 → options:["〜2kg","2〜5kg","5〜10kg","10kg以上"]
+4. 動画の場合：パン/チルトのこだわりを確認 → options:["滑らかさ重視","カウンターバランス","コンパクト"]
+5. 設置スピードを確認 → options:["素早い架設","精密な調整","こだわらない"]
+6. 三脚との組み合わせを確認 → options:["Manfrotto三脚","他社三脚","これから購入"]`,
 
-    monopods: `【一脚の質問フロー】以下の順番で1つずつ質問してください：
-1. 主な用途（スポーツ・報道/動画・走り撮り/登山・旅行/野鳥・望遠）を確認
-2. 使用機材の重量を確認（カメラ機種 or 重量目安）
-3. 雲台が必要か確認（一脚のみ/セット/既に持っている）
-4. 自立機能が必要か確認
-5. ロック方式（レバー式/ナット式）の好みを確認
-6. 素材（カーボン/アルミ）の希望を確認`,
+    monopods: `【一脚の質問フロー】この順番で1つずつ質問：
+1. 用途を確認 → options:["スポーツ・報道","動画・走り撮り","登山・旅行","野鳥・望遠"]
+2. 機材重量を確認 → options:["〜1.5kg","〜2.5kg","〜5kg","〜8kg"]
+3. 雲台の必要性を確認 → options:["一脚のみ","雲台セット","既に持っている"]
+4. 自立機能を確認 → options:["必要","不要","あれば嬉しい"]
+5. ロック方式を確認 → options:["レバー式","ナット式","こだわらない"]
+6. 素材を確認 → options:["カーボン","アルミ","こだわらない"]`,
 
-    lighting: `【照明スタンドの質問フロー】以下の順番で1つずつ質問してください：
-1. 主な用途（ポートレート/動画・YouTube/商品撮影/屋外ロケ）を確認
-2. 使用する光源の種類（ストロボ/LED/リングライト/大型モノブロック）を確認
-3. スタンドが必要か確認（スタンドも欲しい/既に持っている/アクセサリーのみ）
-4. 設置場所（スタジオ固定/自宅・小スペース/屋外ロケ/卓上）を確認
-5. アームやブームが必要か確認
-6. バックドロップ（背景紙）が必要か確認`
+    lighting: `【照明スタンドの質問フロー】この順番で1つずつ質問：
+1. 用途を確認 → options:["ポートレート","動画・YouTube","商品撮影","屋外ロケ"]
+2. 光源の種類を確認 → options:["ストロボ","LED","リングライト","大型モノブロック"]
+3. スタンドの必要性を確認 → options:["スタンドも欲しい","既に持っている","アクセサリーのみ"]
+4. 設置場所を確認 → options:["スタジオ固定","自宅・小スペース","屋外","卓上"]
+5. アームの必要性を確認 → options:["必要","不要","わからない"]
+6. バックドロップの必要性を確認 → options:["必要","不要"]`
   },
 
   en: {
-    tripods: `[Tripod Question Flow] Ask ONE question at a time in this order:
-1. Confirm: tripod only OR tripod + head set
-2. Confirm: mainly photo / mainly video / both
-3. Confirm camera model or weight estimate → essential for payload calculation
-4. Video only: ask about pan/tilt smoothness and counterbalance needs
-5. Confirm material preference (carbon / aluminum)
-6. Confirm shooting scene (hiking / travel / studio / sports etc.)`,
+    tripods: `[Tripod Flow] Ask ONE question at a time in this order:
+1. Tripod only or with head set → options:["Tripod only","With head set"]
+2. Main use → options:["Mainly photo","Mainly video","Both"]
+3. Camera brand → options:["Sony","Canon","Nikon","Fujifilm","Other"]
+4. Video: pan/tilt needs → options:["Smooth panning","Quick setup","Doesn't matter"]
+5. Material → options:["Carbon","Aluminum","No preference"]
+6. Scene → options:["Travel/hiking","Street","Studio","Sports"]`,
 
-    bags: `[Camera Bag Question Flow] Ask ONE question at a time in this order:
-1. Confirm bag type (backpack / shoulder / waist / roller)
-2. Confirm gear for ONE typical outing (not total owned gear)
-3. Confirm largest lens (70-200mm f/2.8 is a key dividing point)
-4. Confirm personal items (gear only / a little / everyday use) → if everyday: ask laptop size
-5. Confirm tripod carry (none / compact / full-size)
-6. Confirm main scene (travel / street / professional / video)`,
+    bags: `[Camera Bag Flow] Ask ONE question at a time in this order:
+1. Bag type → options:["Backpack","Shoulder bag","Waist bag","Roller bag"]
+2. Gear for one outing → options:["1 body + 1-2 lenses","1 body + 3-4 lenses","2+ bodies"]
+3. Largest lens → options:["Standard zoom","70-200mm","Super telephoto","Cine lens"]
+4. Personal items → options:["Gear only","A little","Everyday use too"]
+5. Tripod carry → options:["No tripod","Compact tripod","Full-size tripod"]
+6. Main scene → options:["Travel/hiking","Street","Professional","Video"]`,
 
-    heads: `[Ball Head Question Flow] Ask ONE question at a time in this order:
-1. Ask if head type is decided (ball head / fluid head / 3-way / gear)
-2. Confirm main shooting (photo / video / both)
-3. Confirm equipment weight (camera model or weight estimate)
-4. Video: ask about pan/tilt smoothness and counterbalance
-5. Confirm setup speed priority (quick setup / precise adjustment)
-6. Confirm tripod compatibility (Manfrotto / other brand / not yet purchased)`,
+    heads: `[Head Flow] Ask ONE question at a time in this order:
+1. Head type → options:["Ball head","Fluid head","3-way","Gear head","Not sure"]
+2. Main use → options:["Mainly photo","Mainly video","Both"]
+3. Equipment weight → options:["~2kg","2-5kg","5-10kg","10kg+"]
+4. Video: pan/tilt → options:["Smooth panning","Counterbalance","Compact size"]
+5. Setup speed → options:["Quick setup","Precise adjustment","No preference"]
+6. Tripod combo → options:["Manfrotto tripod","Other brand","Not yet purchased"]`,
 
-    monopods: `[Monopod Question Flow] Ask ONE question at a time in this order:
-1. Confirm main use (sports & news / video & run-and-gun / hiking / wildlife & telephoto)
-2. Confirm equipment weight (camera model or weight estimate)
-3. Confirm head needed (monopod only / with head / already have one)
-4. Ask if self-standing feature is needed
-5. Confirm lock type preference (lever / twist)
-6. Confirm material (carbon / aluminum)`,
+    monopods: `[Monopod Flow] Ask ONE question at a time in this order:
+1. Main use → options:["Sports & news","Video & run","Hiking & travel","Wildlife & tele"]
+2. Equipment weight → options:["~1.5kg","~2.5kg","~5kg","~8kg"]
+3. Head needed → options:["Monopod only","With head","Already have one"]
+4. Self-standing → options:["Yes needed","Not needed","Nice to have"]
+5. Lock type → options:["Lever lock","Twist lock","No preference"]
+6. Material → options:["Carbon","Aluminum","No preference"]`,
 
-    lighting: `[Lighting Stand Question Flow] Ask ONE question at a time in this order:
-1. Confirm main use (portrait / video & YouTube / product / outdoor location)
-2. Confirm light source type (strobe / LED / ring light / large monoblock)
-3. Confirm if stand is needed (need stand / already have / accessories only)
-4. Confirm location (studio / home small space / outdoor / desktop)
-5. Ask if boom arm is needed
-6. Ask if backdrop system is needed`
+    lighting: `[Lighting Flow] Ask ONE question at a time in this order:
+1. Main use → options:["Portrait","Video & YouTube","Product","Outdoor location"]
+2. Light source → options:["Strobe","LED","Ring light","Large monoblock"]
+3. Stand needed → options:["Need stand","Already have","Accessories only"]
+4. Location → options:["Studio fixed","Home small space","Outdoor","Desktop"]
+5. Boom arm → options:["Yes needed","Not needed","Not sure"]
+6. Backdrop → options:["Yes needed","Not needed"]`
   }
 };
 
-// ── Camera weight reference ──
-const CAMERA_REF = `Sony: α7IV=659g α7C=509g α6700=493g FX3=715g ZV-E1=483g
-Canon: R6II=670g R5II=910g R50=375g R8=461g C70=1010g
-Nikon: Z6III=760g Z8=910g Z9=1340g Zf=710g D850=1005g
-Fujifilm: X-T5=557g X-H2=660g X100VI=521g GFX100SII=883g
-Ricoh: GRIV=275g GRIIIx=262g
-Panasonic: S5II=740g S9=431g GH7=658g
-OM System: OM-1II=599g OM-5=414g`;
+const CAMERA_REF = `Sony:α7IV=659g,α7C=509g,α6700=493g,FX3=715g
+Canon:R6II=670g,R5II=910g,R50=375g,C70=1010g
+Nikon:Z6III=760g,Z8=910g,Z9=1340g,D850=1005g
+Fujifilm:X-T5=557g,X-H2=660g,X100VI=521g
+Ricoh:GRIV=275g,GRIIIx=262g`;
 
 function buildGuidancePrompt(lang, category) {
   const flow = category && FLOWS[lang]?.[category]
     ? FLOWS[lang][category]
     : (lang === 'ja'
       ? 'まずどのカテゴリーをお探しか確認し、そのカテゴリーに合った質問をしてください。'
-      : 'First confirm the product category, then ask relevant questions.');
+      : 'First confirm what product category they need, then follow the appropriate flow.');
 
   const langRule = lang === 'ja'
     ? '必ず日本語で回答してください。'
     : 'Always respond in English.';
 
-  // Check if we have data for this category
-  const hasData = category ? !!loadMini(`${category}.json`) : false;
-  const dataConfirm = category && hasData
+  // Get real product samples to prove data exists
+  const sample = category ? getProductSample(category) : null;
+  const dataNote = sample
     ? (lang === 'ja'
-      ? `\nCONFIRMED: あなたは「${category}」カテゴリーの製品データベースを持っています。絶対に「データがない」「取り扱いがない」とは言わないでください。`
-      : `\nCONFIRMED: You HAVE product data for "${category}" category in your database. NEVER say you don't have this product type.`)
+      ? `\n【重要】データベースに${sample.count}件の製品があります：${sample.samples}\nこれらは実在するManfrotto製品です。絶対に「取り扱いがない」と言わないでください。`
+      : `\n[IMPORTANT] Database has ${sample.count} real products: ${sample.samples}\nNEVER say Manfrotto doesn't carry this product type.`)
     : '';
 
-  const responseExample = lang === 'ja'
-    ? `{"message":"動画撮影がメインですね！次に、使用されるカメラ機種を教えていただけますか？","options":["Sony α7","Canon R6","Nikon Z6","ビデオカメラ"]}`
-    : `{"message":"Great, mainly for video! Which camera do you use?","options":["Sony α7","Canon R6","Nikon Z6","Video camera"]}`;
+  const exampleJa = `{"message":"動画撮影がメインですね！使用されるカメラを教えてください。","options":["Sony","Canon","Nikon","Fujifilm","その他"]}`;
+  const exampleEn = `{"message":"Great, mainly for video! Which camera brand do you use?","options":["Sony","Canon","Nikon","Fujifilm","Other"]}`;
 
-  return `You are a friendly and knowledgeable Manfrotto product advisor.
+  return `You are a friendly Manfrotto product advisor.
 ${langRule}
-${dataConfirm}
+${dataNote}
 
-CONVERSATION STYLE:
-- Always acknowledge the customer's answer warmly before asking the next question
-- Example: "動画撮影がメインですね！" or "Great choice for video!"
-- Ask exactly ONE question at a time
-- Never list multiple questions together
-- Keep responses concise and natural
+STYLE:
+- Warmly acknowledge each answer before asking the next question
+- Ask exactly ONE question per response
+- Never say you don't have a product category
 
 ${flow}
 
-CAMERA WEIGHT REFERENCE:
-${CAMERA_REF}
+CAMERA WEIGHT: ${CAMERA_REF}
 
-IMPORTANT: You DO have a product database. When you have enough info, you will recommend real products.
-Do NOT tell customers you don't have products — you will recommend them when the time comes.
-Do NOT recommend products yet — just gather information through conversation.
+Do NOT recommend products yet — keep gathering information.
 
-RESPONSE FORMAT (strict JSON only, no text outside):
-{"message":"Your warm response + next question","options":["choice1","choice2","choice3","choice4"]}
+RESPONSE FORMAT — strict JSON only, nothing else:
+{"message":"warm acknowledgment + one question","options":["opt1","opt2","opt3"]}
 
-CRITICAL RULES FOR options:
-- options MUST ALWAYS be provided — NEVER return empty options []
-- Always provide 3-5 SHORT choices (under 12 characters each)
-- Options must directly answer your question
-- Match customer's language (Japanese or English)
+RULES: options array MUST always have 3-5 items. Use the options shown in the flow above.
 
-OPTIONS EXAMPLES per question type:
-- セット or 単体？ → ["三脚のみ", "雲台セット"]
-- 写真 or 動画？ → ["写真メイン", "動画メイン", "両方"]
-- 素材は？ → ["カーボン", "アルミ", "こだわらない"]
-- 三脚持ち歩く？ → ["持ち歩かない", "小型三脚", "大型三脚"]
-- PCは？ → ["持ち歩かない", "13インチ以下", "15インチ", "16インチ以上"]
-- シーンは？ → ["旅行・登山", "街撮り", "スタジオ", "スポーツ"]
-- カメラは？ → ["Sony", "Canon", "Nikon", "Fujifilm", "その他"]
-- タイプは？ → ["バックパック", "ショルダー", "ウエスト", "ローラー"]
-- 雲台は？ → ["必要", "不要", "持っている"]
-- 自立は？ → ["必要", "不要", "あれば嬉しい"]
-
-Example: ${responseExample}`;
+Example: ${lang === 'ja' ? exampleJa : exampleEn}`;
 }
 
 function buildRecommendPrompt(lang, category, messages) {
   const productData = category ? loadMini(`${category}.json`) : null;
   const cameraData = loadMini('cameras.json');
   const summary = messages.filter(m => m.role === 'user').map(m => m.content).join(' / ');
+  const langRule = lang === 'ja' ? '必ず日本語で回答してください。' : 'Always respond in English.';
+  const itemCount = productData
+    ? (Array.isArray(productData) ? productData.length : Object.values(productData).flat().length)
+    : 0;
 
-  const langRule = lang === 'ja'
-    ? '必ず日本語で回答してください。'
-    : 'Always respond in English.';
-
-  const intro = lang === 'ja'
-    ? 'ご条件に合う製品をデータベースから検索し、最適な製品を推薦してください。'
-    : 'Search the database for products matching the customer needs and recommend the best ones.';
-
-  return `You are a Manfrotto product advisor. ${intro}
+  return `You are a Manfrotto product advisor. Recommend products from the database below.
 ${langRule}
 
 CUSTOMER NEEDS: ${summary}
 
 CAMERA DATABASE: ${cameraData ? JSON.stringify(cameraData.cameras) : ''}
 
-PRODUCT DATABASE (recommend ONLY from this list, never invent products):
-${productData ? JSON.stringify(productData) : 'No data available for this category'}
+PRODUCT DATABASE (${itemCount} products — recommend ONLY from this list):
+${productData ? JSON.stringify(productData) : 'No data'}
 
-IMPORTANT: The product database above contains real Manfrotto products. 
-Use ONLY products listed above. Do NOT say the database is empty if data is shown above.
-Total products available: ${productData ? (Array.isArray(productData) ? productData.length : Object.values(productData).flat().length) : 0}
+WEIGHT SAFETY: payload_kg ≥ (camera + lens weight) × 2
 
-WEIGHT SAFETY: payload_kg must be ≥ (camera + lens weight) × 2
+RESPONSE FORMAT — strict JSON only:
+{"type":"products","message":"intro text","items":[{"name":"製品名","sku":"型番","reason":"推薦理由2〜3文"}]}
 
-RESPONSE FORMAT (strict JSON only):
-{"type":"products","message":"${lang === 'ja' ? 'ご条件に合う製品をご提案します' : 'Here are my recommendations based on your needs'}","items":[{"name":"製品名","sku":"型番","reason":"推薦理由2〜3文"}]}
-
-Recommend 3-5 products. Never include products not in the database.`;
+Recommend 3-5 products. Never invent products not in the database.`;
 }
 
 export default async function handler(req, res) {
@@ -232,16 +210,16 @@ export default async function handler(req, res) {
   const userMessages = messages.filter(m => m.role === 'user');
   const lastUserMsg = userMessages[userMessages.length - 1]?.content || '';
 
-  const recommendSignals = /以上です|それで|おすすめ|推薦|recommend|that'?s all|決めて|お願い|please recommend|show me|suggest/i;
+  const recommendSignals = /以上です|おすすめ|推薦|recommend|that'?s all|決めて|お願い|please|show me|suggest/i;
   const shouldRecommend = category &&
     userMessages.length >= 4 &&
     (userMessages.length >= 6 || recommendSignals.test(lastUserMsg));
 
+  const phase = shouldRecommend ? 'RECOMMEND' : 'GUIDE';
   const systemPrompt = shouldRecommend
     ? buildRecommendPrompt(lang, category, messages)
     : buildGuidancePrompt(lang, category);
 
-  const phase = shouldRecommend ? 'RECOMMEND' : 'GUIDE';
   console.log(`[${phase}] lang:${lang} category:${category} turns:${userMessages.length}`);
 
   try {
@@ -259,7 +237,7 @@ export default async function handler(req, res) {
           { role: 'system', content: systemPrompt },
           ...messages
         ],
-        temperature: 0.3,
+        temperature: 0.2,
         max_tokens: 1000
       })
     });
