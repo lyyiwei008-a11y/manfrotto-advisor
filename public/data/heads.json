@@ -1,0 +1,786 @@
+{
+  "photo": [
+    {
+      "sku": "400",
+      "name": "400 ギア付き雲台",
+      "type": "ギア付き雲台",
+      "price": 123091.20000000001,
+      "payload_kg": 16,
+      "weight_kg": 10,
+      "material": "±90°",
+      "features": "アルミニウム",
+      "included_plate": "3軸ミリ単位精度調整/400系プレート対応"
+    },
+    {
+      "sku": "405",
+      "name": "405 ギアプロ雲台",
+      "type": "ギア付き雲台",
+      "price": 79636,
+      "payload_kg": 16,
+      "weight_kg": 7.5,
+      "material": "±90°/−30°",
+      "features": "アルミニウム",
+      "included_plate": "R&Cリリースシステム/360°精密パン/フリーポール"
+    },
+    {
+      "sku": "410",
+      "name": "410 ギア付きジュニア雲台",
+      "type": "ギア付き雲台",
+      "price": 36545.6,
+      "payload_kg": 13,
+      "weight_kg": 5,
+      "material": null,
+      "features": "アルミニウム",
+      "included_plate": "R&Cリリースシステム/三軸精密調整"
+    },
+    {
+      "sku": "MHXPRO-3WG",
+      "name": "MHXPRO-3WG XPRO3ウェイクイックリリースプレート付",
+      "type": "ギア付き雲台",
+      "price": 28181.600000000002,
+      "payload_kg": 13,
+      "weight_kg": 12,
+      "material": "±90°/−30°",
+      "features": "アルミニウム",
+      "included_plate": "マイクロフリクションコントロール/R&Cコントロールシステム"
+    },
+    {
+      "sku": "MH01HY-3W",
+      "name": "befree 3ウェイライブ雲台",
+      "type": "3ウェイ雲台",
+      "price": 22280,
+      "payload_kg": 15.5,
+      "weight_kg": 6,
+      "material": "-30°〜+70°",
+      "features": "マグネシウム",
+      "included_plate": "折り畳みハンドル/フルードシステム"
+    },
+    {
+      "sku": "229",
+      "name": "229 3Dプロ雲台",
+      "type": "3ウェイ雲台",
+      "price": 32734.4,
+      "payload_kg": 16,
+      "weight_kg": 12,
+      "material": "±90°",
+      "features": "アルミニウム",
+      "included_plate": "最大サイズ3ウェイ雲台"
+    },
+    {
+      "sku": "808RC4",
+      "name": "808RC4 標準3ウェイ雲台 クイックリリースプレート付",
+      "type": "3ウェイ雲台",
+      "price": 18276,
+      "payload_kg": 15.8,
+      "weight_kg": 12,
+      "material": "±90°",
+      "features": "アルミニウム",
+      "included_plate": "カウンターバランス大型スプリング"
+    },
+    {
+      "sku": "MH804-3W",
+      "name": "MH804-3W 804ベーシック3ウェイ雲台クイックリリースプレート付",
+      "type": "3ウェイ雲台",
+      "price": 12181.6,
+      "payload_kg": 12,
+      "weight_kg": 10,
+      "material": "±90°",
+      "features": "マグネシウム",
+      "included_plate": "格納式レバー"
+    },
+    {
+      "sku": "056",
+      "name": "056 3Dジュニア雲台",
+      "type": "3ウェイ雲台",
+      "price": 7080,
+      "payload_kg": 10,
+      "weight_kg": 5,
+      "material": "±90°",
+      "features": "アルミニウム",
+      "included_plate": "コンパクトカメラ用"
+    },
+    {
+      "sku": "MHXPRO-BHQ2",
+      "name": "MHXPRO-BHQ2 XPROボール雲台Q2付き ブラック",
+      "type": "ボール雲台",
+      "price": 21368,
+      "payload_kg": 11.3,
+      "weight_kg": 15,
+      "material": "±90°",
+      "features": "マグネシウム",
+      "included_plate": "トリプルロッキングシステム/独立パン/フリクション調整"
+    },
+    {
+      "sku": "MHXPRO-BHQ6",
+      "name": "MHXPRO-BHQ6 XPROボール雲台Q6付き グレー",
+      "type": "ボール雲台",
+      "price": 27096,
+      "payload_kg": 11.3,
+      "weight_kg": 15,
+      "material": null,
+      "features": "マグネシウム",
+      "included_plate": "トリプルロッキングシステム"
+    },
+    {
+      "sku": "MH490-BH",
+      "name": "MH490-BH センターボール雲台",
+      "type": "ボール雲台",
+      "price": 7776,
+      "payload_kg": 9,
+      "weight_kg": 8,
+      "material": null,
+      "features": "アルミニウム",
+      "included_plate": "ライトウェイト"
+    },
+    {
+      "sku": "MH492-BH",
+      "name": "MH492-BH センターボール雲台",
+      "type": "ボール雲台",
+      "price": 9552,
+      "payload_kg": 6.3,
+      "weight_kg": 8,
+      "material": null,
+      "features": "アルミニウム",
+      "included_plate": null
+    },
+    {
+      "sku": "MH492LCD-BH",
+      "name": "MH492LCD-BH センターボール雲台 コールドシュー付き",
+      "type": "ボール雲台",
+      "price": 12545.6,
+      "payload_kg": 7.4,
+      "weight_kg": 8,
+      "material": null,
+      "features": "アルミニウム",
+      "included_plate": "コールドシュー付/LCDモニター装着"
+    },
+    {
+      "sku": "MH494-BH",
+      "name": "MH494-BH MH494センターボール雲台",
+      "type": "ボール雲台",
+      "price": 12728,
+      "payload_kg": 10,
+      "weight_kg": 9,
+      "material": null,
+      "features": "アルミニウム",
+      "included_plate": "フリクションコントロール"
+    },
+    {
+      "sku": "MH494",
+      "name": "MH494 センターボール雲台 ディスクトップ",
+      "type": "ボール雲台",
+      "price": 10456,
+      "payload_kg": 10,
+      "weight_kg": 8,
+      "material": null,
+      "features": "アルミニウム",
+      "included_plate": "ラウンドディスクトップタイプ"
+    },
+    {
+      "sku": "MH496-BH",
+      "name": "MH496-BH センターボール雲台",
+      "type": "ボール雲台",
+      "price": 14552,
+      "payload_kg": 11.5,
+      "weight_kg": 12,
+      "material": null,
+      "features": "アルミニウム",
+      "included_plate": "ロック強度が高い"
+    },
+    {
+      "sku": "MH496-Q6",
+      "name": "MH496-Q6 センターボール雲台Q6付き",
+      "type": "ボール雲台",
+      "price": 16000,
+      "payload_kg": 11.5,
+      "weight_kg": 10,
+      "material": null,
+      "features": "アルミニウム",
+      "included_plate": "カメラ上から取付可能フリクション調整"
+    },
+    {
+      "sku": "MHXPRO-2W",
+      "name": "MHXPRO-2W XPROフルードビデオ雲台",
+      "type": "2ウェイ/その他",
+      "price": 17096,
+      "payload_kg": 10,
+      "weight_kg": 5,
+      "material": "±90°",
+      "features": "アルミニウム",
+      "included_plate": "フルードシステム/アダプト対応"
+    },
+    {
+      "sku": "MH055M8-Q5",
+      "name": "MH055M8-Q5 055マグネシウムフォトムービー雲台Q5付き",
+      "type": "2ウェイ/その他",
+      "price": 47008,
+      "payload_kg": 13.5,
+      "weight_kg": 7,
+      "material": "-30°〜+90°",
+      "features": "マグネシウム",
+      "included_plate": "フォトムービー/R&Cコントロール/フォトムービーセレクター/フルードドラッグ"
+    },
+    {
+      "sku": "234RC",
+      "name": "234RC 一脚クイックリリーススティルトップ",
+      "type": "2ウェイ/その他",
+      "price": 4400,
+      "payload_kg": 6,
+      "weight_kg": 5,
+      "material": null,
+      "features": "アルミニウム",
+      "included_plate": "234クイックリリースカメラプレートシステム"
+    },
+    {
+      "sku": "393",
+      "name": "393 望遠レンズ用一脚ブラケット",
+      "type": "2ウェイ/その他",
+      "price": 29600,
+      "payload_kg": null,
+      "weight_kg": 20,
+      "material": null,
+      "features": "アルミニウム",
+      "included_plate": "バンパー付き/3段深さ調整可能"
+    },
+    {
+      "sku": "324RC2",
+      "name": "324RC2 ジョイスティック雲台",
+      "type": "ボール雲台",
+      "price": 16894.4,
+      "payload_kg": 10.1,
+      "weight_kg": 4,
+      "material": "±90°",
+      "features": "マグネシウム",
+      "included_plate": "ジョイスティック/グリップ解除バンパーロック"
+    },
+    {
+      "sku": "327RC2",
+      "name": "327RC2 ジョイスティック雲台",
+      "type": "ボール雲台",
+      "price": 24988.800000000003,
+      "payload_kg": 10.1,
+      "weight_kg": 6,
+      "material": "±90°",
+      "features": "マグネシウム",
+      "included_plate": "デュアルグリップ型ジョイスティック"
+    },
+    {
+      "sku": "322RC2",
+      "name": "322RC2 水平クリックアクションボール雲台",
+      "type": "ボール雲台",
+      "price": 20988.800000000003,
+      "payload_kg": 10.3,
+      "weight_kg": 8,
+      "material": "±90°",
+      "features": "マグネシウム",
+      "included_plate": "水平クリック機能/ボールフリクション調整"
+    },
+    {
+      "sku": "MHPANOVR",
+      "name": "MHPANOVR VR撮影サポート マルチプレート付きパノラマ雲台",
+      "type": "パノラマ雲台",
+      "price": 78000,
+      "payload_kg": 32,
+      "weight_kg": 4,
+      "material": null,
+      "features": "アルミニウム",
+      "included_plate": "スライドブレート/VR映像用/MHPANOVR-Q5ネジ対応"
+    },
+    {
+      "sku": "300N",
+      "name": "300N パノローテーションユニット",
+      "type": "パノラマ雲台",
+      "price": 30400,
+      "payload_kg": 5.3,
+      "weight_kg": 14,
+      "material": null,
+      "features": "アルミニウム",
+      "included_plate": "パノラマ回転/360°回転セット"
+    },
+    {
+      "sku": "MH057A5",
+      "name": "MH057A5 パン雲台",
+      "type": "パノラマ雲台",
+      "price": 64160,
+      "payload_kg": 28,
+      "weight_kg": 5,
+      "material": "±90°",
+      "features": "マグネシウム",
+      "included_plate": "アルカサイズ互換プレート/ハンドル折り畳み/VRパノラマ用"
+    },
+    {
+      "sku": "MHXPRO-3W",
+      "name": "MHXPRO-3W XPRO3ウェイ雲台クイックリリースプレート付",
+      "type": "ギア付き雲台",
+      "price": 18181.600000000002,
+      "payload_kg": 13,
+      "weight_kg": 12,
+      "material": "±90°/−30°",
+      "features": "アルミニウム",
+      "included_plate": "マイクロフリクションコントロール/XPRO"
+    },
+    {
+      "sku": "MHXPRO-3WG",
+      "name": "MHXPRO-3WG XPRO3ウェイ雲台(ギア付き)クイックリリースプレート付",
+      "type": "ギア付き雲台",
+      "price": 28181.600000000002,
+      "payload_kg": 13,
+      "weight_kg": 12,
+      "material": "±90°/−30°",
+      "features": "アルミニウム",
+      "included_plate": "マイクロトリックノブ/R&Cコントロールシステム"
+    }
+  ],
+  "video": [
+    {
+      "sku": "MVH612AH",
+      "name": "ビデオ雲台 単体 nitrotech 612 フルードビデオ雲台",
+      "series": "nitrotech 612",
+      "price": 109545,
+      "payload_kg": 12,
+      "weight_kg": 2.27,
+      "features": "140",
+      "discontinued": false
+    },
+    {
+      "sku": "MVK612TWINMC",
+      "name": "カーボンツイン三脚キット MS",
+      "series": "nitrotech 612",
+      "price": 237500,
+      "payload_kg": 12,
+      "weight_kg": 2.27,
+      "features": null,
+      "discontinued": false
+    },
+    {
+      "sku": "MVK612TWINGC",
+      "name": "カーボンツイン三脚キット GS",
+      "series": "nitrotech 612",
+      "price": 237500,
+      "payload_kg": 12,
+      "weight_kg": 2.27,
+      "features": null,
+      "discontinued": false
+    },
+    {
+      "sku": "MVK612TWINMA",
+      "name": "アルミツイン三脚キット MS",
+      "series": "nitrotech 612",
+      "price": 212500,
+      "payload_kg": 12,
+      "weight_kg": 2.27,
+      "features": null,
+      "discontinued": false
+    },
+    {
+      "sku": "MVK612TWINGA",
+      "name": "アルミツイン三脚キット GS",
+      "series": "nitrotech 612",
+      "price": 212500,
+      "payload_kg": 12,
+      "weight_kg": 2.27,
+      "features": null,
+      "discontinued": false
+    },
+    {
+      "sku": "MVK612TWINFC",
+      "name": "カーボンツイン三脚キット 645FAST+カーボン",
+      "series": "nitrotech 612",
+      "price": 262273,
+      "payload_kg": 12,
+      "weight_kg": 2.27,
+      "features": null,
+      "discontinued": false
+    },
+    {
+      "sku": "MVK612TWINFA",
+      "name": "アルミツイン三脚キット 645FAST+アルミ",
+      "series": "nitrotech 612",
+      "price": 255455,
+      "payload_kg": 12,
+      "weight_kg": 2.27,
+      "features": null,
+      "discontinued": false
+    },
+    {
+      "sku": "MVK612CTALL",
+      "name": "カーボン三脚キット 536+カーボン4段",
+      "series": "nitrotech 612",
+      "price": 251136,
+      "payload_kg": 12,
+      "weight_kg": 2.27,
+      "features": null,
+      "discontinued": false
+    },
+    {
+      "sku": "MVK612SNGFC",
+      "name": "カーボン三脚キット 635FAST(生産終了)",
+      "series": "nitrotech 612",
+      "price": 261364,
+      "payload_kg": 12,
+      "weight_kg": 2.27,
+      "features": null,
+      "discontinued": false
+    },
+    {
+      "sku": "MVH608AH",
+      "name": "ビデオ雲台 単体 nitrotech 608 フルードビデオ雲台",
+      "series": "nitrotech 608",
+      "price": 86364,
+      "payload_kg": 8,
+      "weight_kg": 2.22,
+      "features": "90",
+      "discontinued": false
+    },
+    {
+      "sku": "MVK608TWINMC",
+      "name": "カーボンツイン三脚キット MS",
+      "series": "nitrotech 608",
+      "price": 214545,
+      "payload_kg": 8,
+      "weight_kg": 2.22,
+      "features": null,
+      "discontinued": false
+    },
+    {
+      "sku": "MVK608TWINGC",
+      "name": "カーボンツイン三脚キット GS",
+      "series": "nitrotech 608",
+      "price": 214545,
+      "payload_kg": 8,
+      "weight_kg": 2.22,
+      "features": null,
+      "discontinued": false
+    },
+    {
+      "sku": "MVK608TWINMA",
+      "name": "アルミツイン三脚キット MS",
+      "series": "nitrotech 608",
+      "price": 194318,
+      "payload_kg": 8,
+      "weight_kg": 2.22,
+      "features": null,
+      "discontinued": false
+    },
+    {
+      "sku": "MVK608TWINGA",
+      "name": "アルミツイン三脚キット GS",
+      "series": "nitrotech 608",
+      "price": 194318,
+      "payload_kg": 8,
+      "weight_kg": 2.22,
+      "features": null,
+      "discontinued": false
+    },
+    {
+      "sku": "MVK608TWINFC",
+      "name": "カーボン三脚キット 645FAST+カーボン",
+      "series": "nitrotech 608",
+      "price": 256818,
+      "payload_kg": 8,
+      "weight_kg": 2.22,
+      "features": null,
+      "discontinued": false
+    },
+    {
+      "sku": "MVK608TWINFA",
+      "name": "アルミ三脚キット 645FAST+アルミ",
+      "series": "nitrotech 608",
+      "price": 229545,
+      "payload_kg": 8,
+      "weight_kg": 2.22,
+      "features": null,
+      "discontinued": false
+    },
+    {
+      "sku": "MVK608CTALL",
+      "name": "カーボン三脚キット 536+カーボン4段",
+      "series": "nitrotech 608",
+      "price": 229545,
+      "payload_kg": 8,
+      "weight_kg": 2.22,
+      "features": null,
+      "discontinued": false
+    },
+    {
+      "sku": "MVK608SNGFC",
+      "name": "カーボン三脚キット 635FAST(生産終了)",
+      "series": "nitrotech 608",
+      "price": 255455,
+      "payload_kg": 8,
+      "weight_kg": 2.22,
+      "features": null,
+      "discontinued": false
+    },
+    {
+      "sku": "MVH504XAH",
+      "name": "ビデオ雲台 単体 504X フルードビデオ雲台",
+      "series": "504X雲台",
+      "price": 72500,
+      "payload_kg": 6.5,
+      "weight_kg": 2,
+      "features": "92",
+      "discontinued": false
+    },
+    {
+      "sku": "MVK504XCTALL",
+      "name": "カーボン三脚キット 536",
+      "series": "504X雲台",
+      "price": 226136,
+      "payload_kg": 6.5,
+      "weight_kg": 2,
+      "features": null,
+      "discontinued": false
+    },
+    {
+      "sku": "MVK504XSNGFC",
+      "name": "カーボン三脚キット 635FAST",
+      "series": "504X雲台",
+      "price": 193182,
+      "payload_kg": 6.5,
+      "weight_kg": 2,
+      "features": null,
+      "discontinued": false
+    },
+    {
+      "sku": "MVK504XTWINFA",
+      "name": "アルミ三脚キット 645FAST",
+      "series": "504X雲台",
+      "price": 169545,
+      "payload_kg": 6.5,
+      "weight_kg": 2,
+      "features": null,
+      "discontinued": false
+    },
+    {
+      "sku": "MVK504XTWINGC",
+      "name": "アルミツイン三脚キット GS",
+      "series": "504X雲台",
+      "price": 186591,
+      "payload_kg": 6.5,
+      "weight_kg": 2,
+      "features": null,
+      "discontinued": false
+    },
+    {
+      "sku": "MVK504XTWINGA",
+      "name": "アルミツイン三脚キット GS",
+      "series": "504X雲台",
+      "price": 146818,
+      "payload_kg": 6.5,
+      "weight_kg": 2,
+      "features": null,
+      "discontinued": false
+    },
+    {
+      "sku": "MVK504XTWINMA",
+      "name": "アルミツイン三脚キット MS",
+      "series": "504X雲台",
+      "price": 146818,
+      "payload_kg": 6.5,
+      "weight_kg": 2,
+      "features": null,
+      "discontinued": false
+    },
+    {
+      "sku": "MVK504XTWINMC",
+      "name": "カーボンツイン三脚キット MS",
+      "series": "504X雲台",
+      "price": 186591,
+      "payload_kg": 6.5,
+      "weight_kg": 2,
+      "features": null,
+      "discontinued": false
+    },
+    {
+      "sku": "MVH502AH",
+      "name": "ビデオ雲台 単体 502 フルードビデオ雲台",
+      "series": "502雲台",
+      "price": 33409,
+      "payload_kg": 4,
+      "weight_kg": 1.6,
+      "features": "85",
+      "discontinued": false
+    },
+    {
+      "sku": "MVK502055XPRO3",
+      "name": "055アルミ三脚キット",
+      "series": "502雲台",
+      "price": 65000,
+      "payload_kg": 4,
+      "weight_kg": 1.6,
+      "features": null,
+      "discontinued": false
+    },
+    {
+      "sku": "MVK502055CXPROV",
+      "name": "055カーボン三脚4段キット",
+      "series": "502雲台",
+      "price": 143409,
+      "payload_kg": 4,
+      "weight_kg": 1.6,
+      "features": null,
+      "discontinued": false
+    },
+    {
+      "sku": "MVK502055XPRO3V",
+      "name": "055アルミ三脚3段キット",
+      "series": "502雲台",
+      "price": 102273,
+      "payload_kg": 4,
+      "weight_kg": 1.6,
+      "features": null,
+      "discontinued": false
+    },
+    {
+      "sku": "MVK502AM-1",
+      "name": "ツイン3段アルミ MSタイプ",
+      "series": "502雲台",
+      "price": 76818,
+      "payload_kg": 4,
+      "weight_kg": 1.6,
+      "features": null,
+      "discontinued": false
+    },
+    {
+      "sku": "MVH502A,546BK-1",
+      "name": "ビデオキット ツイン3段アルミ MS",
+      "series": "502雲台",
+      "price": 108864,
+      "payload_kg": 4,
+      "weight_kg": 1.6,
+      "features": null,
+      "discontinued": false
+    },
+    {
+      "sku": "MVH502A,546GB-1",
+      "name": "ビデオキット ツインGSタイプ",
+      "series": "502雲台",
+      "price": 113864,
+      "payload_kg": 4,
+      "weight_kg": 1.6,
+      "features": null,
+      "discontinued": false
+    },
+    {
+      "sku": "MVH500AH",
+      "name": "プロフルードビデオ雲台 フラットベース（生産終了）",
+      "series": "500雲台",
+      "price": 23864,
+      "payload_kg": 2.4,
+      "weight_kg": "フラットベース(55mm径メス)",
+      "features": "CBS採用/水準器/イージーリンクコネクター/カメラネジ1/4\"×1,1/4\"→3/8\"変換",
+      "discontinued": true
+    },
+    {
+      "sku": "MVK500190XV",
+      "name": "ビデオ三脚キット MVH500AHビデオ雲台+レベリング付きアルミ三脚",
+      "series": "500雲台",
+      "price": 57727,
+      "payload_kg": 2.4,
+      "weight_kg": "フラットベース(55mm径メス)",
+      "features": null,
+      "discontinued": false
+    },
+    {
+      "sku": "MVK500190X3",
+      "name": "MVH500AHビデオ雲台+MT190X3アルミ三脚",
+      "series": "500雲台",
+      "price": 49545,
+      "payload_kg": 2.4,
+      "weight_kg": "フラットベース(55mm径メス)",
+      "features": null,
+      "discontinued": false
+    },
+    {
+      "sku": "MVK500AM",
+      "name": "ビデオキット ツイン3段アルミ MS（生産終了）",
+      "series": "500雲台",
+      "price": 56364,
+      "payload_kg": 2.4,
+      "weight_kg": "フラットベース(55mm径メス)",
+      "features": null,
+      "discontinued": false
+    },
+    {
+      "sku": "509HD",
+      "name": "プロビデオフルード雲台 100mm",
+      "series": "509HD雲台",
+      "price": 148182,
+      "payload_kg": "2.8-8.5",
+      "weight_kg": "100mmハーフポール",
+      "features": "CBS/4段カウンターバランス/アドバンスバランシングレコーダー/水準器/照明付",
+      "discontinued": false
+    },
+    {
+      "sku": "MVK509TWINFC",
+      "name": "カーボンツイン三脚キット 645FAST",
+      "series": "509HD雲台",
+      "price": 293527,
+      "payload_kg": "2.8-8.5",
+      "weight_kg": "100mmハーフポール",
+      "features": null,
+      "discontinued": false
+    },
+    {
+      "sku": "MVK509TWINFA",
+      "name": "アルミツイン三脚キット 645FAST",
+      "series": "509HD雲台",
+      "price": 265573,
+      "payload_kg": "2.8-8.5",
+      "weight_kg": "100mmハーフポール",
+      "features": null,
+      "discontinued": false
+    },
+    {
+      "sku": "509HD,536K",
+      "name": "カーボンファイバー三脚キット 536(L)",
+      "series": "509HD雲台",
+      "price": 318750,
+      "payload_kg": "2.8-8.5",
+      "weight_kg": "100mmハーフポール",
+      "features": null,
+      "discontinued": false
+    },
+    {
+      "sku": "509HD,545GBK",
+      "name": "ビデオキット ツイン GSタイプ",
+      "series": "509HD雲台",
+      "price": 259091,
+      "payload_kg": "2.8-8.5",
+      "weight_kg": "100mmハーフポール",
+      "features": null,
+      "discontinued": false
+    },
+    {
+      "sku": "MVKBFRTC-LIVE",
+      "name": "カーボン三脚ビデオ雲台キット",
+      "series": "befree live",
+      "price": 66364,
+      "payload_kg": null,
+      "weight_kg": "フラットベース",
+      "features": "befree liveカーボン三脚+ビデオ雲台/開脚角度4段(22°54°89°)/イージーリンク",
+      "discontinued": false
+    },
+    {
+      "sku": "MVKBFRL-LIVE",
+      "name": "アルミニウム三脚ビデオ雲台キット",
+      "series": "befree live",
+      "price": 46364,
+      "payload_kg": null,
+      "weight_kg": "フラットベース",
+      "features": "befree liveアルミ三脚+ビデオ雲台/開脚角度4段/イージーリンク",
+      "discontinued": false
+    },
+    {
+      "sku": "MVH400AH",
+      "name": "小型フルードビデオ雲台 フラットベース",
+      "series": "400雲台",
+      "price": 18182,
+      "payload_kg": null,
+      "weight_kg": "フラットベース",
+      "features": "befree live付属フルード雲台/パン360°/水準器/スライディングプレート",
+      "discontinued": false
+    }
+  ]
+}
