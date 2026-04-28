@@ -496,16 +496,17 @@ function appendMsg(role, content) {
       const sku = (p.sku || '').toString().trim();
       const card = document.createElement('div');
       card.className = 'product-card';
+      const imgSrc = (p.image && p.image.startsWith('http')) ? p.image : '/images/hero-tripod.png';
       card.innerHTML = `
         <div class="product-card-header" onclick="toggleCard(this.parentElement)">
           <div class="product-card-img">
-            <img src="/images/hero-tripod.png" alt="${p.name}" onerror="this.src='/images/hero-tripod.png'">
+            <img src="${imgSrc}" alt="${p.name}" onerror="this.src='/images/hero-tripod.png'">
           </div>
           <div class="product-card-info">
             <div class="product-card-num">0${i + 1}</div>
             <div class="product-card-name">${p.name}</div>
             <div class="product-card-sku">${sku}</div>
-            ${p.price ? `<div class="product-card-price">¥${Number(p.price).toLocaleString()}</div>` : ''}
+            ${p.price && !isNaN(Number(p.price)) ? `<div class="product-card-price">¥${Number(p.price).toLocaleString()}</div>` : ''}
           </div>
           <div class="product-card-chevron">▼</div>
         </div>
