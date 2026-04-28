@@ -4,771 +4,557 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Manfrotto Product Advisor</title>
-<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700&family=Noto+Sans+JP:wght@300;400;500&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Barlow:wght@300;400;500;600&family=Barlow+Condensed:wght@400;500;600;700&family=Noto+Sans+JP:wght@300;400;500&display=swap" rel="stylesheet">
 <style>
-  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-  :root {
-    --red: #e8192c;
-    --dark: #111;
-    --light: #f5f5f5;
-    --border: #e0e0e0;
-    --text: #1a1a1a;
-    --muted: #666;
-    --fs: clamp(13px, 1.4vw, 15px);
-  }
-  body { font-family: 'Noto Sans JP', -apple-system, sans-serif; background: #fff; color: var(--text); font-size: var(--fs); line-height: 1.6; }
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
+  --red: #e8192c;
+  --black: #0a0a0a;
+  --gray-700: #444;
+  --gray-400: #999;
+  --gray-200: #e8e8e8;
+  --gray-100: #f5f5f5;
+  --white: #fff;
+}
+html, body { height: 100%; }
+body {
+  font-family: 'Noto Sans JP', 'Barlow', sans-serif;
+  background: var(--white);
+  color: var(--black);
+  font-size: 14px;
+  line-height: 1.6;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  -webkit-font-smoothing: antialiased;
+}
 
-  /* HERO */
-  .hero { position: relative; background: var(--dark); overflow: hidden; height: clamp(160px, 22vw, 280px); display: flex; align-items: center; }
-  .hero-bg { position: absolute; inset: 0; background-image: url('/images/hero-tripod.png'); background-size: contain; background-repeat: no-repeat; background-position: right center; opacity: 0.35; }
-  .hero-content { position: relative; z-index: 2; padding: 0 clamp(20px, 5vw, 60px); }
-  .hero-logo-mark { background: var(--red); color: #fff; font-family: 'Barlow Condensed', sans-serif; font-size: clamp(11px, 1.2vw, 14px); font-weight: 700; letter-spacing: 0.1em; padding: 3px 10px; text-transform: uppercase; display: inline-block; margin-bottom: 8px; }
-  .hero-title { font-family: 'Barlow Condensed', sans-serif; font-size: clamp(26px, 5vw, 56px); font-weight: 700; color: #fff; letter-spacing: 0.02em; line-height: 1; text-transform: uppercase; }
-  .hero-sub { font-size: clamp(11px, 1.2vw, 14px); color: rgba(255,255,255,0.6); margin-top: 6px; letter-spacing: 0.05em; }
+/* HEADER */
+.header {
+  flex-shrink: 0;
+  background: var(--white);
+  border-bottom: 1px solid var(--gray-200);
+  padding: 0 clamp(16px, 4vw, 40px);
+  height: 56px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+.header-left { display: flex; align-items: center; gap: 14px; }
+.header-logo { height: 22px; width: auto; }
+.header-divider { width: 1px; height: 16px; background: var(--gray-200); }
+.header-title {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: var(--gray-400);
+}
+.lang-toggle { display: flex; border: 1px solid var(--gray-200); overflow: hidden; }
+.lang-btn {
+  background: none; border: none;
+  padding: 5px 12px;
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 11px; font-weight: 600;
+  letter-spacing: 0.1em;
+  cursor: pointer; color: var(--gray-400);
+  transition: all 0.15s;
+}
+.lang-btn.active { background: var(--black); color: var(--white); }
 
-  /* CATEGORY STRIP */
-  .cat-strip { background: var(--dark); border-top: 1px solid #2a2a2a; display: flex; overflow-x: auto; scrollbar-width: none; }
-  .cat-strip::-webkit-scrollbar { display: none; }
-  .cat-item { flex: 1; min-width: 90px; display: flex; flex-direction: column; align-items: center; gap: 6px; padding: clamp(12px, 2vw, 20px) 8px; cursor: pointer; border-bottom: 3px solid transparent; transition: border-color 0.15s, background 0.15s; }
-  .cat-item:hover { background: #1a1a1a; }
-  .cat-item.active { border-bottom-color: var(--red); }
-  .cat-img { width: clamp(36px, 5vw, 52px); height: clamp(36px, 5vw, 52px); object-fit: contain; filter: brightness(0.75); transition: filter 0.15s; }
-  .cat-item:hover .cat-img, .cat-item.active .cat-img { filter: brightness(1); }
-  .cat-label { font-family: 'Barlow Condensed', sans-serif; font-size: clamp(11px, 1.1vw, 13px); font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; color: rgba(255,255,255,0.55); text-align: center; }
-  .cat-item.active .cat-label { color: #fff; }
+/* CHAT */
+.chat-container {
+  flex: 1;
+  overflow-y: auto;
+  padding: clamp(24px, 4vw, 40px) clamp(16px, 4vw, 40px) 100px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  max-width: 800px;
+  width: 100%;
+  margin: 0 auto;
+}
 
-  /* MAIN */
-  .main { padding: clamp(20px, 4vw, 48px) clamp(16px, 5vw, 60px); max-width: 860px; margin: 0 auto; }
+/* MESSAGES */
+.msg { display: flex; gap: 12px; animation: fadeUp 0.25s ease; }
+.msg.user { flex-direction: row-reverse; }
+@keyframes fadeUp { from{opacity:0;transform:translateY(6px)} to{opacity:1;transform:translateY(0)} }
 
-  /* STEPS */
-  .step-wrap { display: none; }
-  .step-wrap.show { display: block; }
-  .step-block { margin-bottom: 28px; }
-  .step-header { display: flex; align-items: baseline; gap: 12px; margin-bottom: 14px; padding-bottom: 12px; border-bottom: 2px solid var(--dark); }
-  .step-num { font-family: 'Barlow Condensed', sans-serif; font-size: clamp(22px, 3.5vw, 38px); font-weight: 700; color: var(--red); line-height: 1; }
-  .step-title { font-size: clamp(13px, 1.5vw, 16px); font-weight: 500; color: var(--dark); }
-  .step-note { font-size: 11px; color: var(--muted); margin-bottom: 10px; line-height: 1.7; }
+.msg-avatar {
+  width: 32px; height: 32px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  display: flex; align-items: center; justify-content: center;
+  overflow: hidden;
+}
+.msg.bot .msg-avatar { background: var(--white); border: 1px solid var(--gray-200); padding: 4px; }
+.msg.bot .msg-avatar img { width: 100%; height: auto; object-fit: contain; }
+.msg.user .msg-avatar {
+  background: var(--gray-100); border: 1px solid var(--gray-200);
+  font-family: 'Barlow Condensed', sans-serif; font-size: 13px; font-weight: 700; color: var(--gray-400);
+}
 
-  /* TAGS */
-  .form-group { margin-bottom: 16px; }
-  .form-label { font-size: 11px; font-weight: 500; letter-spacing: 0.12em; text-transform: uppercase; color: var(--muted); margin-bottom: 9px; display: block; }
-  .tag-wrap { display: flex; flex-wrap: wrap; gap: 7px; }
-  .tag { background: #fff; border: 1.5px solid var(--border); padding: 6px 14px; font-size: 12px; cursor: pointer; color: var(--text); transition: all 0.12s; user-select: none; }
-  .tag:hover { border-color: var(--dark); }
-  .tag.on { background: var(--dark); color: #fff; border-color: var(--dark); }
+.msg-bubble { max-width: 75%; padding: 12px 16px; font-size: 14px; line-height: 1.7; }
+.msg.bot .msg-bubble { background: var(--gray-100); border-radius: 0 12px 12px 12px; color: var(--black); }
+.msg.user .msg-bubble { background: var(--black); border-radius: 12px 0 12px 12px; color: var(--white); }
 
-  /* TYPE CARDS (head type selector) */
-  .type-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
-  .type-card { background: var(--light); border: 1.5px solid var(--border); padding: 12px 14px; cursor: pointer; transition: all 0.12s; }
-  .type-card:hover { border-color: var(--dark); }
-  .type-card.on { border-color: var(--dark); background: #ebebeb; }
-  .type-card.full { grid-column: span 2; }
-  .type-name { font-size: 13px; font-weight: 500; color: var(--dark); margin-bottom: 3px; }
-  .type-desc { font-size: 11px; color: var(--muted); line-height: 1.5; }
-  .type-use { font-size: 11px; color: var(--red); margin-top: 5px; font-weight: 500; }
+/* PRODUCT CARDS */
+.products-wrap { display: flex; flex-direction: column; gap: 8px; margin-top: 8px; width: 100%; }
+.product-intro { font-size: 14px; line-height: 1.7; margin-bottom: 12px; }
 
-  /* COMBO CARDS (weight) */
-  .combo-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
-  .combo-card { background: var(--light); border: 1.5px solid var(--border); padding: 12px 14px; cursor: pointer; transition: all 0.12s; }
-  .combo-card:hover { border-color: var(--dark); }
-  .combo-card.on { border-color: var(--dark); background: #ebebeb; }
-  .combo-top { font-size: 13px; font-weight: 500; color: var(--dark); margin-bottom: 3px; }
-  .combo-eg { font-size: 11px; color: var(--muted); line-height: 1.5; }
-  .combo-weight { font-size: 11px; color: var(--muted); font-weight: 500; margin-top: 6px; padding-top: 6px; border-top: 1px solid var(--border); transition: color 0.12s; }
-  .combo-card.on .combo-weight { color: var(--red); }
+.product-card {
+  border: 1px solid var(--gray-200);
+  background: var(--white);
+  transition: border-color 0.15s;
+  cursor: pointer;
+}
+.product-card:hover { border-color: var(--black); }
 
-  /* CONDITIONAL */
-  .cond-block { display: none; }
-  .cond-block.show { display: block; }
+.product-card-header { display: flex; align-items: center; }
 
-  /* INPUT */
-  input[type=text] { width: 100%; border: 1.5px solid var(--border); padding: 10px 14px; font-size: 13px; outline: none; font-family: inherit; transition: border-color 0.15s; border-radius: 0; }
-  input[type=text]:focus { border-color: var(--dark); }
+.product-card-img {
+  width: 72px; height: 72px;
+  background: var(--gray-100);
+  flex-shrink: 0;
+  display: flex; align-items: center; justify-content: center;
+  border-right: 1px solid var(--gray-200);
+  padding: 10px;
+}
+.product-card-img img { width: 100%; height: 100%; object-fit: contain; }
 
-  /* DIVIDER */
-  .divider { display: flex; align-items: center; gap: 12px; margin: 24px 0 18px; }
-  .divider::before, .divider::after { content: ''; flex: 1; height: 1px; background: var(--border); }
-  .divider span { font-size: 11px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--muted); white-space: nowrap; }
+.product-card-info { flex: 1; padding: 10px 14px; }
+.product-card-num {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 10px; font-weight: 700; letter-spacing: 0.2em; text-transform: uppercase;
+  color: var(--red); margin-bottom: 2px;
+}
+.product-card-name { font-family: 'Barlow', sans-serif; font-size: 14px; font-weight: 500; color: var(--black); line-height: 1.3; }
+.product-card-sku { font-family: 'Barlow Condensed', sans-serif; font-size: 11px; letter-spacing: 0.08em; color: var(--gray-400); text-transform: uppercase; margin-top: 2px; }
+.product-card-price { font-size: 12px; color: var(--gray-700); margin-top: 2px; }
 
-  /* CTA */
-  .cta-btn { width: 100%; background: var(--red); color: #fff; border: none; padding: clamp(12px, 2vw, 16px); font-family: 'Barlow Condensed', sans-serif; font-size: clamp(15px, 1.8vw, 18px); font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; cursor: pointer; transition: background 0.15s; margin-top: 4px; }
-  .cta-btn:hover { background: #c0101f; }
-  .cta-btn:disabled { background: #ccc; cursor: not-allowed; }
+.product-card-chevron {
+  width: 40px; height: 72px;
+  display: flex; align-items: center; justify-content: center;
+  color: var(--gray-400); font-size: 11px; flex-shrink: 0;
+  border-left: 1px solid var(--gray-200);
+  transition: transform 0.2s;
+}
+.product-card.open .product-card-chevron { transform: rotate(180deg); }
 
-  /* RESULTS */
-  #result-area { display: none; margin-top: 28px; }
-  .result-header { font-family: 'Barlow Condensed', sans-serif; font-size: clamp(16px, 2vw, 22px); font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; color: var(--dark); margin-bottom: 20px; padding-bottom: 12px; border-bottom: 2px solid var(--dark); }
-  .product { border-top: 1px solid var(--border); padding: 18px 0; display: grid; grid-template-columns: 90px 1fr; gap: 16px; align-items: start; }
-  .product:first-of-type { border-top: none; padding-top: 0; }
-  .product-img-wrap { background: var(--light); aspect-ratio: 1; display: flex; align-items: center; justify-content: center; overflow: hidden; }
-  .product-img-wrap img { width: 100%; height: 100%; object-fit: contain; padding: 8px; }
-  .product-name { font-size: clamp(13px, 1.5vw, 15px); font-weight: 500; color: var(--dark); margin-bottom: 2px; }
-  .product-sku { font-family: 'Barlow Condensed', sans-serif; font-size: 12px; letter-spacing: 0.08em; color: var(--muted); margin-bottom: 7px; text-transform: uppercase; }
-  .product-reason { font-size: 12px; color: #555; line-height: 1.7; margin-bottom: 9px; }
-  .product-link { display: inline-flex; align-items: center; gap: 5px; color: var(--red); font-size: 12px; font-weight: 500; text-decoration: none; border-bottom: 1px solid var(--red); padding-bottom: 1px; }
-  .product-link:hover { opacity: 0.75; }
+.product-card-body { display: none; padding: 14px 16px; border-top: 1px solid var(--gray-200); background: var(--gray-100); }
+.product-card.open .product-card-body { display: block; }
 
-  /* LOADING */
-  .loading-wrap { display: flex; align-items: center; gap: 10px; padding: 20px 0; color: var(--muted); font-size: 13px; }
-  .dots { display: inline-flex; gap: 4px; }
-  .dot { width: 6px; height: 6px; border-radius: 50%; background: var(--red); animation: pulse 1.2s infinite; }
-  .dot:nth-child(2) { animation-delay: 0.2s; }
-  .dot:nth-child(3) { animation-delay: 0.4s; }
-  @keyframes pulse { 0%,80%,100%{opacity:.2} 40%{opacity:1} }
-  .error-msg { color: var(--red); font-size: 13px; padding: 12px 16px; background: #fff5f5; border-left: 3px solid var(--red); }
-  .reset-btn { background: none; border: 1.5px solid var(--border); padding: 8px 20px; font-size: 12px; letter-spacing: 0.08em; text-transform: uppercase; cursor: pointer; color: var(--muted); margin-top: 20px; transition: all 0.15s; }
-  .reset-btn:hover { border-color: var(--dark); color: var(--dark); }
+.product-reason { font-size: 13px; color: var(--gray-700); line-height: 1.7; margin-bottom: 14px; }
 
-  /* FOOTER */
-  .footer-strip { background: var(--dark); padding: 16px clamp(16px, 5vw, 60px); display: flex; align-items: center; gap: 12px; margin-top: 40px; }
-  .footer-logo { font-family: 'Barlow Condensed', sans-serif; font-size: 13px; font-weight: 700; letter-spacing: 0.15em; text-transform: uppercase; color: rgba(255,255,255,0.5); }
-  .footer-sep { width: 20px; height: 1px; background: var(--red); }
-  .footer-tag { font-size: 11px; color: rgba(255,255,255,0.35); letter-spacing: 0.1em; text-transform: uppercase; }
+.store-links { display: flex; flex-direction: column; gap: 6px; }
+.store-link {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 9px 14px;
+  background: var(--white); border: 1px solid var(--gray-200);
+  text-decoration: none;
+  transition: border-color 0.12s, background 0.12s;
+}
+.store-link:hover { border-color: var(--black); background: var(--gray-100); }
+.store-link-left { display: flex; align-items: center; gap: 10px; }
+.store-icon {
+  width: 22px; height: 22px; border-radius: 4px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 10px; font-weight: 700; color: var(--white); flex-shrink: 0;
+  font-family: 'Barlow Condensed', sans-serif;
+}
+.store-icon.bic { background: #e30017; }
+.store-icon.yodo { background: #e60012; }
+.store-icon.amazon { background: #ff9900; color: var(--black); }
+.store-name { font-family: 'Barlow Condensed', sans-serif; font-size: 12px; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; color: var(--black); }
+.store-arrow { font-size: 12px; color: var(--gray-400); }
 
-  #placeholder { text-align: center; padding: 48px 0; color: var(--muted); }
-  .ph-title { font-family: 'Barlow Condensed', sans-serif; font-size: clamp(18px, 3vw, 28px); font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; color: var(--dark); margin-bottom: 8px; }
+/* TYPING */
+.typing-indicator { display: flex; align-items: center; gap: 4px; padding: 12px 16px; background: var(--gray-100); border-radius: 0 12px 12px 12px; width: fit-content; }
+.typing-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--gray-400); animation: typing 1.2s ease-in-out infinite; }
+.typing-dot:nth-child(2) { animation-delay: 0.2s; }
+.typing-dot:nth-child(3) { animation-delay: 0.4s; }
+@keyframes typing { 0%,60%,100%{transform:translateY(0)} 30%{transform:translateY(-4px)} }
 
-  @media (max-width: 520px) {
-    .combo-grid, .type-grid { grid-template-columns: 1fr; }
-    .type-card.full { grid-column: span 1; }
-    .product { grid-template-columns: 72px 1fr; }
-  }
+/* INPUT BAR */
+.input-bar {
+  position: fixed; bottom: 0; left: 0; right: 0;
+  background: var(--white); border-top: 1px solid var(--gray-200);
+  padding: 12px clamp(16px, 4vw, 40px); z-index: 50;
+}
+.input-inner { max-width: 800px; margin: 0 auto; display: flex; gap: 8px; align-items: flex-end; }
+.input-field {
+  flex: 1; border: 1px solid var(--gray-200); background: var(--gray-100);
+  padding: 10px 16px; font-family: 'Noto Sans JP', sans-serif; font-size: 14px; color: var(--black);
+  outline: none; resize: none; min-height: 44px; max-height: 120px; line-height: 1.5;
+  transition: border-color 0.15s; border-radius: 22px;
+}
+.input-field:focus { border-color: var(--black); background: var(--white); }
+.input-field::placeholder { color: var(--gray-400); }
+
+.icon-btn {
+  width: 44px; height: 44px; border-radius: 50%; border: none;
+  cursor: pointer; display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0; transition: all 0.15s;
+}
+.icon-btn svg { width: 18px; height: 18px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+
+.mic-btn { background: var(--gray-100); border: 1px solid var(--gray-200); color: var(--gray-400); }
+.mic-btn:hover { border-color: var(--black); color: var(--black); }
+.mic-btn.recording { background: var(--red); border-color: var(--red); color: var(--white); animation: mic-pulse 1s ease-in-out infinite; }
+@keyframes mic-pulse { 0%,100%{box-shadow:0 0 0 0 rgba(232,25,44,.4)} 50%{box-shadow:0 0 0 8px rgba(232,25,44,0)} }
+
+.send-btn { background: var(--red); color: var(--white); }
+.send-btn:hover { background: #c8111f; }
+.send-btn:active { transform: scale(0.95); }
+.send-btn:disabled { background: var(--gray-200); cursor: not-allowed; }
+
+/* WELCOME */
+.welcome {
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  text-align: center; padding: 48px 24px; flex: 1; min-height: 60vh;
+}
+.welcome-logo { height: 32px; width: auto; margin: 0 auto 24px; display: block; }
+.welcome-title {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: clamp(26px, 4vw, 40px); font-weight: 600;
+  text-transform: uppercase; letter-spacing: 0.02em;
+  color: var(--black); margin-bottom: 10px; line-height: 1.1;
+}
+.welcome-sub { font-size: 14px; color: var(--gray-400); max-width: 400px; line-height: 1.7; margin-bottom: 28px; }
+.welcome-chips { display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; max-width: 520px; }
+.welcome-chip {
+  background: var(--gray-100); border: 1px solid var(--gray-200);
+  padding: 8px 16px; font-size: 13px; cursor: pointer; color: var(--gray-700);
+  transition: all 0.12s; border-radius: 20px;
+}
+.welcome-chip:hover { border-color: var(--black); color: var(--black); background: var(--white); }
+
+@media (max-width: 560px) {
+  .msg-bubble { max-width: 85%; }
+  .product-card-img { width: 56px; height: 56px; }
+}
 </style>
 </head>
 <body>
 
-<div class="hero">
-  <div class="hero-bg"></div>
-  <div class="hero-content">
-    <div class="hero-logo-mark">Manfrotto</div>
-    <div class="hero-title">Product Advisor</div>
-    <div class="hero-sub">AIがあなたにぴったりの商品をご提案します</div>
+<header class="header">
+  <div class="header-left">
+    <img class="header-logo" src="/images/manfrotto-logo.png" alt="Manfrotto">
+    <div class="header-divider"></div>
+    <span class="header-title">Product Advisor</span>
+  </div>
+  <div class="lang-toggle">
+    <button class="lang-btn active" onclick="setLang('ja')">日本語</button>
+    <button class="lang-btn" onclick="setLang('en')">English</button>
+  </div>
+</header>
+
+<div class="chat-container" id="chat">
+  <div class="welcome" id="welcome">
+    <img class="welcome-logo" src="/images/manfrotto-logo.png" alt="Manfrotto">
+    <div class="welcome-title" id="welcome-title">Find Your<br>Perfect Gear</div>
+    <div class="welcome-sub" id="welcome-sub">気になる製品カテゴリーや用途を教えてください。<br>最適なManfrotto製品をご提案します。</div>
+    <div class="welcome-chips" id="welcome-chips"></div>
   </div>
 </div>
 
-<div class="cat-strip">
-  <div class="cat-item" id="c-bag" onclick="pickCat('bag')">
-    <img class="cat-img" src="/images/cat-bag.jpg" alt="Bag">
-    <span class="cat-label">バッグ</span>
+<div class="input-bar">
+  <div class="input-inner">
+    <textarea class="input-field" id="input-field" rows="1"
+      placeholder="メッセージを入力 / Type your message..."
+      onkeydown="handleKey(event)"
+      oninput="autoResize(this)"></textarea>
+    <button class="icon-btn mic-btn" id="mic-btn" onclick="toggleVoice()">
+      <svg viewBox="0 0 24 24"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"></path><path d="M19 10v2a7 7 0 0 1-14 0v-2"></path><line x1="12" y1="19" x2="12" y2="23"></line><line x1="8" y1="23" x2="16" y2="23"></line></svg>
+    </button>
+    <button class="icon-btn send-btn" id="send-btn" onclick="sendMessage()">
+      <svg viewBox="0 0 24 24"><line x1="22" y1="2" x2="11" y2="13"></line><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon></svg>
+    </button>
   </div>
-  <div class="cat-item" id="c-tripod" onclick="pickCat('tripod')">
-    <img class="cat-img" src="/images/cat-tripod.png" alt="Tripod">
-    <span class="cat-label">三脚</span>
-  </div>
-  <div class="cat-item" id="c-head" onclick="pickCat('head')">
-    <img class="cat-img" src="/images/cat-head.png" alt="Head">
-    <span class="cat-label">雲台</span>
-  </div>
-  <div class="cat-item" id="c-monopod" onclick="pickCat('monopod')">
-    <img class="cat-img" src="/images/cat-monopod.png" alt="Monopod">
-    <span class="cat-label">一脚</span>
-  </div>
-  <div class="cat-item" id="c-light" onclick="pickCat('light')">
-    <img class="cat-img" src="/images/cat-light.png" alt="Light">
-    <span class="cat-label">照明</span>
-  </div>
-  <div class="cat-item" id="c-other" onclick="pickCat('other')">
-    <img class="cat-img" src="/images/cat-other.png" alt="Other">
-    <span class="cat-label">その他</span>
-  </div>
-</div>
-
-<div class="main">
-  <div id="placeholder">
-    <div class="ph-title">上のカテゴリーを選んでください</div>
-    <div style="font-size:13px;">AIがmanfrotto.comから最適な商品をご提案します</div>
-  </div>
-
-  <!-- ===== BAG ===== -->
-  <div class="step-wrap" id="f-bag">
-    <div class="step-block">
-      <div class="step-header"><span class="step-num">01</span><span class="step-title">バッグのタイプを教えてください</span></div>
-      <div class="tag-wrap" id="g-bagtype">
-        <span class="tag" onclick="tog(this,'g-bagtype')">バックパック</span>
-        <span class="tag" onclick="tog(this,'g-bagtype')">ショルダー / 斜めがけ</span>
-        <span class="tag" onclick="tog(this,'g-bagtype')">ウエストポーチ</span>
-        <span class="tag" onclick="tog(this,'g-bagtype')">ローラーバッグ（機内持込）</span>
-        <span class="tag" onclick="tog(this,'g-bagtype')">おすすめで選んでほしい</span>
-      </div>
-    </div>
-    <div class="step-block">
-      <div class="step-header"><span class="step-num">02</span><span class="step-title">今回の撮影で持ち出す機材の組み合わせは？</span></div>
-      <div class="step-note">所有台数ではなく、一回の撮影で実際に持ち出す組み合わせを選んでください</div>
-      <div class="tag-wrap" id="g-gear-combo">
-        <span class="tag" onclick="tog(this,'g-gear-combo')">カメラ1台 + レンズ1〜2本（軽装）</span>
-        <span class="tag" onclick="tog(this,'g-gear-combo')">カメラ1台 + レンズ3〜4本（標準）</span>
-        <span class="tag" onclick="tog(this,'g-gear-combo')">カメラ2台 + レンズ複数（本格）</span>
-        <span class="tag" onclick="tog(this,'g-gear-combo')">カメラ2台以上 + 大型レンズあり（プロ）</span>
-      </div>
-    </div>
-    <div class="step-block">
-      <div class="step-header"><span class="step-num">03</span><span class="step-title">持ち出す中で一番大きいレンズは？</span></div>
-      <div class="step-note">レンズの最大サイズがバッグの仕切り設計に直結します</div>
-      <div class="tag-wrap" id="g-lens-size">
-        <span class="tag" onclick="tog(this,'g-lens-size')">単焦点・標準ズーム（〜24-70mm）</span>
-        <span class="tag" onclick="tog(this,'g-lens-size')">大口径ズーム（70-200mm f/2.8 など）</span>
-        <span class="tag" onclick="tog(this,'g-lens-size')">超望遠（300mm 以上）</span>
-        <span class="tag" onclick="tog(this,'g-lens-size')">シネレンズ（大型）</span>
-      </div>
-    </div>
-    <div class="step-block">
-      <div class="step-header"><span class="step-num">04</span><span class="step-title">個人の荷物はどのくらい入れますか？</span></div>
-      <div class="tag-wrap" id="g-personal">
-        <span class="tag" onclick="tog(this,'g-personal');checkPC(this)">カメラ機材のみ</span>
-        <span class="tag" onclick="tog(this,'g-personal');checkPC(this)">少し入ればいい（財布・スマホ程度）</span>
-        <span class="tag" onclick="tog(this,'g-personal');checkPC(this)">普段使いもしたい（着替え・PCなど）</span>
-      </div>
-      <div class="cond-block" id="cond-pc" style="margin-top:14px">
-        <div class="form-label">ノートPCのサイズは？</div>
-        <div class="tag-wrap" id="g-pc">
-          <span class="tag" onclick="tog(this,'g-pc')">持ち歩かない</span>
-          <span class="tag" onclick="tog(this,'g-pc')">13インチ以下</span>
-          <span class="tag" onclick="tog(this,'g-pc')">15インチ</span>
-          <span class="tag" onclick="tog(this,'g-pc')">16インチ以上</span>
-        </div>
-      </div>
-    </div>
-    <div class="step-block">
-      <div class="step-header"><span class="step-num">05</span><span class="step-title">三脚は一緒に持ち歩きますか？</span></div>
-      <div class="tag-wrap" id="g-tripod-bag">
-        <span class="tag" onclick="tog(this,'g-tripod-bag')">持ち歩かない</span>
-        <span class="tag" onclick="tog(this,'g-tripod-bag')">小型三脚（Befree・Travel 系）</span>
-        <span class="tag" onclick="tog(this,'g-tripod-bag')">大型三脚（055・ONE 系）</span>
-      </div>
-    </div>
-    <div class="step-block">
-      <div class="step-header"><span class="step-num">06</span><span class="step-title">主な使用シーン</span></div>
-      <div class="tag-wrap" id="g-bag-scene">
-        <span class="tag" onclick="tog(this,'g-bag-scene')">旅行・登山</span>
-        <span class="tag" onclick="tog(this,'g-bag-scene')">街撮り・日常</span>
-        <span class="tag" onclick="tog(this,'g-bag-scene')">プロ撮影・仕事</span>
-        <span class="tag" onclick="tog(this,'g-bag-scene')">動画・映像制作</span>
-        <span class="tag" onclick="tog(this,'g-bag-scene')">空港・出張</span>
-      </div>
-    </div>
-  </div>
-
-  <!-- ===== TRIPOD ===== -->
-  <div class="step-wrap" id="f-tripod">
-    <div class="step-block">
-      <div class="step-header"><span class="step-num">01</span><span class="step-title">どのような購入をお考えですか？</span></div>
-      <div class="tag-wrap" id="g-tripod-purchase">
-        <span class="tag" onclick="tog(this,'g-tripod-purchase')">三脚 + 雲台セットで購入したい</span>
-        <span class="tag" onclick="tog(this,'g-tripod-purchase')">三脚のみ（雲台は別途 / 既に持っている）</span>
-      </div>
-    </div>
-    <div class="step-block">
-      <div class="step-header"><span class="step-num">02</span><span class="step-title">主な用途は？</span></div>
-      <div class="tag-wrap" id="g-tripod-use">
-        <span class="tag" onclick="tog(this,'g-tripod-use');checkVideo('cond-video','sn-tripod-mat','sn-tripod-scene',4,5)">写真撮影メイン</span>
-        <span class="tag" onclick="tog(this,'g-tripod-use');checkVideo('cond-video','sn-tripod-mat','sn-tripod-scene',4,5)">動画撮影メイン</span>
-        <span class="tag" onclick="tog(this,'g-tripod-use');checkVideo('cond-video','sn-tripod-mat','sn-tripod-scene',4,5)">写真・動画の両方</span>
-      </div>
-    </div>
-    <div class="step-block">
-      <div class="step-header"><span class="step-num">03</span><span class="step-title">機材の組み合わせを選んでください</span></div>
-      <div class="step-note">安全のため実際の機材重量の約2倍の耐荷重がある三脚をご提案します</div>
-      <div class="combo-grid" id="g-tripod-weight">
-        <div class="combo-card" onclick="pickCombo(this,'tripod','ミラーレス + 小型レンズ（目安〜1.5kg）、推奨耐荷重4kg以上')">
-          <div class="combo-top">ミラーレス + 小型レンズ</div>
-          <div class="combo-eg">例：Sony A7C・Fujifilm X-T5<br>+ 単焦点・標準ズーム</div>
-          <div class="combo-weight">目安〜1.5kg → 推奨耐荷重 4kg以上</div>
-        </div>
-        <div class="combo-card" onclick="pickCombo(this,'tripod','ミラーレス + 大口径ズーム（目安〜2.5kg）、推奨耐荷重6kg以上')">
-          <div class="combo-top">ミラーレス + 大口径ズーム</div>
-          <div class="combo-eg">例：Sony A7 IV・Nikon Z6<br>+ 70-200mm f/2.8</div>
-          <div class="combo-weight">目安〜2.5kg → 推奨耐荷重 6kg以上</div>
-        </div>
-        <div class="combo-card" onclick="pickCombo(this,'tripod','一眼レフ + 標準〜大口径レンズ（目安〜3.5kg）、推奨耐荷重8kg以上')">
-          <div class="combo-top">一眼レフ + 標準〜大口径</div>
-          <div class="combo-eg">例：Canon 5D・Nikon D850<br>+ 24-70mm f/2.8</div>
-          <div class="combo-weight">目安〜3.5kg → 推奨耐荷重 8kg以上</div>
-        </div>
-        <div class="combo-card" onclick="pickCombo(this,'tripod','一眼レフ + 超望遠 / 縦グリップ付き（目安〜5kg）、推奨耐荷重10kg以上')">
-          <div class="combo-top">一眼レフ + 超望遠 / 縦グリ付き</div>
-          <div class="combo-eg">例：Canon 1DX・Nikon D6<br>+ 70-200mm f/2.8・超望遠</div>
-          <div class="combo-weight">目安〜5kg → 推奨耐荷重 10kg以上</div>
-        </div>
-        <div class="combo-card" onclick="pickCombo(this,'tripod','ビデオカメラ / ミラーレス動画機（目安〜8kg）、推奨耐荷重15kg以上')">
-          <div class="combo-top">ビデオカメラ / 動画ミラーレス</div>
-          <div class="combo-eg">例：Sony FX3・Canon C70<br>+ シネレンズ</div>
-          <div class="combo-weight">目安〜8kg → 推奨耐荷重 15kg以上</div>
-        </div>
-        <div class="combo-card" onclick="pickCombo(this,'tripod','シネマカメラ / 放送用カメラ（目安10kg以上）、推奨耐荷重20kg以上')">
-          <div class="combo-top">シネマカメラ / 放送用カメラ</div>
-          <div class="combo-eg">例：ARRI / RED / Sony Venice<br>放送用 ENG カメラ</div>
-          <div class="combo-weight">目安10kg以上 → 推奨耐荷重 20kg以上</div>
-        </div>
-      </div>
-    </div>
-    <div class="cond-block" id="cond-video">
-      <div class="step-block">
-        <div class="step-header"><span class="step-num">04</span><span class="step-title">動画撮影でのこだわりは？</span></div>
-        <div class="tag-wrap" id="g-video-pref">
-          <span class="tag" onclick="tog(this,'g-video-pref')">パン・チルトの滑らかさ重視</span>
-          <span class="tag" onclick="tog(this,'g-video-pref')">カウンターバランス調整が必要</span>
-          <span class="tag" onclick="tog(this,'g-video-pref')">素早いセットアップ優先</span>
-          <span class="tag" onclick="tog(this,'g-video-pref')">持ち運びやすさ優先</span>
-        </div>
-      </div>
-    </div>
-    <div class="step-block">
-      <div class="step-header"><span class="step-num" id="sn-tripod-mat">04</span><span class="step-title">素材の希望</span></div>
-      <div class="tag-wrap" id="g-tripod-mat">
-        <span class="tag" onclick="tog(this,'g-tripod-mat')">カーボン（軽量重視）</span>
-        <span class="tag" onclick="tog(this,'g-tripod-mat')">アルミ（コスパ重視）</span>
-        <span class="tag" onclick="tog(this,'g-tripod-mat')">こだわらない</span>
-      </div>
-    </div>
-    <div class="step-block">
-      <div class="step-header"><span class="step-num" id="sn-tripod-scene">05</span><span class="step-title">撮影シーン</span></div>
-      <div class="tag-wrap" id="g-tripod-scene">
-        <span class="tag" onclick="tog(this,'g-tripod-scene')">風景・夜景</span>
-        <span class="tag" onclick="tog(this,'g-tripod-scene')">登山・旅行</span>
-        <span class="tag" onclick="tog(this,'g-tripod-scene')">動画・Vlog</span>
-        <span class="tag" onclick="tog(this,'g-tripod-scene')">ポートレート</span>
-        <span class="tag" onclick="tog(this,'g-tripod-scene')">スタジオ</span>
-        <span class="tag" onclick="tog(this,'g-tripod-scene')">スポーツ・動物</span>
-      </div>
-    </div>
-  </div>
-
-  <!-- ===== HEAD ===== -->
-  <div class="step-wrap" id="f-head">
-    <div class="step-block">
-      <div class="step-header"><span class="step-num">01</span><span class="step-title">雲台のタイプは決まっていますか？</span></div>
-      <div class="type-grid" id="g-head-type">
-        <div class="type-card" onclick="pickType(this)">
-          <div class="type-name">ボールヘッド</div>
-          <div class="type-desc">1つのボールで自由に動く<br>素早い構図変更が可能</div>
-          <div class="type-use">→ 写真メイン・風景・旅行</div>
-        </div>
-        <div class="type-card" onclick="pickType(this)">
-          <div class="type-name">フルードヘッド</div>
-          <div class="type-desc">パン・チルトが滑らか<br>液圧ダンパー内蔵</div>
-          <div class="type-use">→ 動画・映像メイン</div>
-        </div>
-        <div class="type-card" onclick="pickType(this)">
-          <div class="type-name">3ウェイヘッド</div>
-          <div class="type-desc">3軸を独立して調整<br>精密なアングル設定</div>
-          <div class="type-use">→ 建築・パノラマ・精密撮影</div>
-        </div>
-        <div class="type-card" onclick="pickType(this)">
-          <div class="type-name">ギア雲台</div>
-          <div class="type-desc">ギアで微調整が可能<br>極めて精密な水平調整</div>
-          <div class="type-use">→ 建築・商品・スタジオ</div>
-        </div>
-        <div class="type-card full" onclick="pickType(this)">
-          <div class="type-name">わからない / おすすめで選んでほしい</div>
-          <div class="type-desc">用途を教えていただければ最適なタイプをご提案します</div>
-        </div>
-      </div>
-    </div>
-    <div class="step-block">
-      <div class="step-header"><span class="step-num">02</span><span class="step-title">主な撮影内容</span></div>
-      <div class="tag-wrap" id="g-head-use">
-        <span class="tag" onclick="tog(this,'g-head-use');checkVideo('cond-head-video','sn-head-speed','sn-head-level',4,5)">写真（静止画）</span>
-        <span class="tag" onclick="tog(this,'g-head-use');checkVideo('cond-head-video','sn-head-speed','sn-head-level',4,5)">動画・映像</span>
-        <span class="tag" onclick="tog(this,'g-head-use');checkVideo('cond-head-video','sn-head-speed','sn-head-level',4,5)">写真・動画の両方</span>
-      </div>
-    </div>
-    <div class="step-block">
-      <div class="step-header"><span class="step-num">03</span><span class="step-title">機材の組み合わせ（耐荷重の確認）</span></div>
-      <div class="step-note">三脚の選択と同じ基準で耐荷重を確認します</div>
-      <div class="tag-wrap" id="g-head-weight">
-        <span class="tag" onclick="tog(this,'g-head-weight')">ミラーレス + 小型レンズ（〜1.5kg）</span>
-        <span class="tag" onclick="tog(this,'g-head-weight')">ミラーレス + 大口径ズーム（〜2.5kg）</span>
-        <span class="tag" onclick="tog(this,'g-head-weight')">一眼レフ + 大口径（〜3.5kg）</span>
-        <span class="tag" onclick="tog(this,'g-head-weight')">一眼レフ + 超望遠 / 縦グリ（〜5kg）</span>
-        <span class="tag" onclick="tog(this,'g-head-weight')">ビデオカメラ / 動画機（〜8kg）</span>
-        <span class="tag" onclick="tog(this,'g-head-weight')">シネマカメラ（10kg以上）</span>
-      </div>
-    </div>
-    <div class="cond-block" id="cond-head-video">
-      <div class="step-block">
-        <div class="step-header"><span class="step-num">04</span><span class="step-title">動画撮影でのこだわりは？</span></div>
-        <div class="tag-wrap" id="g-head-video">
-          <span class="tag" onclick="tog(this,'g-head-video')">パン・チルトの滑らかさ重視</span>
-          <span class="tag" onclick="tog(this,'g-head-video')">カウンターバランス調整が必要</span>
-          <span class="tag" onclick="tog(this,'g-head-video')">素早いセットアップ優先</span>
-        </div>
-      </div>
-    </div>
-    <div class="step-block">
-      <div class="step-header"><span class="step-num" id="sn-head-speed">04</span><span class="step-title">設置スピードの優先度は？</span></div>
-      <div class="tag-wrap" id="g-head-speed">
-        <span class="tag" onclick="tog(this,'g-head-speed')">素早い架設が必要（報道・スポーツ）</span>
-        <span class="tag" onclick="tog(this,'g-head-speed')">精密な調整優先（風景・建築）</span>
-        <span class="tag" onclick="tog(this,'g-head-speed')">こだわらない</span>
-      </div>
-    </div>
-    <div class="step-block">
-      <div class="step-header"><span class="step-num" id="sn-head-level">05</span><span class="step-title">水平精度のこだわりは？</span></div>
-      <div class="tag-wrap" id="g-head-level">
-        <span class="tag" onclick="tog(this,'g-head-level')">精密な水平が必要（建築・パノラマ）</span>
-        <span class="tag" onclick="tog(this,'g-head-level')">目視レベルでOK</span>
-        <span class="tag" onclick="tog(this,'g-head-level')">こだわらない</span>
-      </div>
-    </div>
-    <div class="step-block">
-      <div class="step-header"><span class="step-num" id="sn-head-tripod">06</span><span class="step-title">既存の三脚との組み合わせはありますか？</span></div>
-      <div class="tag-wrap" id="g-head-tripod">
-        <span class="tag" onclick="tog(this,'g-head-tripod')">Manfrotto 三脚と合わせて使いたい</span>
-        <span class="tag" onclick="tog(this,'g-head-tripod')">他社三脚と組み合わせる</span>
-        <span class="tag" onclick="tog(this,'g-head-tripod')">三脚もこれから購入予定</span>
-      </div>
-    </div>
-  </div>
-
-  <!-- ===== MONOPOD ===== -->
-  <div class="step-wrap" id="f-monopod">
-    <div class="step-block">
-      <div class="step-header"><span class="step-num">01</span><span class="step-title">主な用途は？</span></div>
-      <div class="tag-wrap" id="g-mono-use">
-        <span class="tag" onclick="tog(this,'g-mono-use')">スポーツ・報道・イベント</span>
-        <span class="tag" onclick="tog(this,'g-mono-use')">動画・走り撮り・Vlog</span>
-        <span class="tag" onclick="tog(this,'g-mono-use')">登山・ハイキング・旅行</span>
-        <span class="tag" onclick="tog(this,'g-mono-use')">野鳥・望遠撮影</span>
-        <span class="tag" onclick="tog(this,'g-mono-use')">スタジオ・ポートレート</span>
-      </div>
-    </div>
-    <div class="step-block">
-      <div class="step-header"><span class="step-num">02</span><span class="step-title">機材の組み合わせ（耐荷重の確認）</span></div>
-      <div class="tag-wrap" id="g-mono-weight">
-        <span class="tag" onclick="tog(this,'g-mono-weight')">ミラーレス + 小型レンズ（〜1.5kg）</span>
-        <span class="tag" onclick="tog(this,'g-mono-weight')">ミラーレス + 大口径ズーム（〜2.5kg）</span>
-        <span class="tag" onclick="tog(this,'g-mono-weight')">一眼レフ + 大口径（〜3.5kg）</span>
-        <span class="tag" onclick="tog(this,'g-mono-weight')">一眼レフ + 超望遠 / 縦グリ（〜5kg）</span>
-        <span class="tag" onclick="tog(this,'g-mono-weight')">ビデオカメラ / 動画機（〜8kg）</span>
-      </div>
-    </div>
-    <div class="step-block">
-      <div class="step-header"><span class="step-num">03</span><span class="step-title">雲台は必要ですか？</span></div>
-      <div class="tag-wrap" id="g-mono-head">
-        <span class="tag" onclick="tog(this,'g-mono-head')">一脚のみでいい</span>
-        <span class="tag" onclick="tog(this,'g-mono-head')">一脚 + 雲台セットで欲しい</span>
-        <span class="tag" onclick="tog(this,'g-mono-head')">既に持っている</span>
-      </div>
-    </div>
-    <div class="step-block">
-      <div class="step-header"><span class="step-num">04</span><span class="step-title">自立機能は必要ですか？</span></div>
-      <div class="tag-wrap" id="g-mono-self">
-        <span class="tag" onclick="tog(this,'g-mono-self')">必要（短時間でも自立させたい）</span>
-        <span class="tag" onclick="tog(this,'g-mono-self')">不要（常に手で支える）</span>
-        <span class="tag" onclick="tog(this,'g-mono-self')">あればいい</span>
-      </div>
-    </div>
-    <div class="step-block">
-      <div class="step-header"><span class="step-num">05</span><span class="step-title">ロック方式の好みは？</span></div>
-      <div class="tag-wrap" id="g-mono-lock">
-        <span class="tag" onclick="tog(this,'g-mono-lock')">レバー式（素早い操作優先）</span>
-        <span class="tag" onclick="tog(this,'g-mono-lock')">ナット式（しっかり固定優先）</span>
-        <span class="tag" onclick="tog(this,'g-mono-lock')">こだわらない</span>
-      </div>
-    </div>
-    <div class="step-block">
-      <div class="step-header"><span class="step-num">06</span><span class="step-title">石突（脚先）のタイプは？</span></div>
-      <div class="tag-wrap" id="g-mono-tip">
-        <span class="tag" onclick="tog(this,'g-mono-tip')">室内メイン（ゴム脚）</span>
-        <span class="tag" onclick="tog(this,'g-mono-tip')">屋外メイン（スパイク）</span>
-        <span class="tag" onclick="tog(this,'g-mono-tip')">室内・屋外どちらも（交換式）</span>
-        <span class="tag" onclick="tog(this,'g-mono-tip')">こだわらない</span>
-      </div>
-    </div>
-    <div class="step-block">
-      <div class="step-header"><span class="step-num">07</span><span class="step-title">段数・携帯サイズのこだわりは？</span></div>
-      <div class="tag-wrap" id="g-mono-sections">
-        <span class="tag" onclick="tog(this,'g-mono-sections')">折畳み重視（4〜5段、短くなる）</span>
-        <span class="tag" onclick="tog(this,'g-mono-sections')">安定性重視（2〜3段、太いパイプ）</span>
-        <span class="tag" onclick="tog(this,'g-mono-sections')">こだわらない</span>
-      </div>
-    </div>
-    <div class="step-block">
-      <div class="step-header"><span class="step-num">08</span><span class="step-title">素材の希望</span></div>
-      <div class="tag-wrap" id="g-mono-mat">
-        <span class="tag" onclick="tog(this,'g-mono-mat')">カーボン（軽量重視）</span>
-        <span class="tag" onclick="tog(this,'g-mono-mat')">アルミ（コスパ重視）</span>
-        <span class="tag" onclick="tog(this,'g-mono-mat')">こだわらない</span>
-      </div>
-    </div>
-  </div>
-
-  <!-- ===== LIGHT ===== -->
-  <div class="step-wrap" id="f-light">
-    <div class="step-block">
-      <div class="step-header"><span class="step-num">01</span><span class="step-title">主な用途は？</span></div>
-      <div class="tag-wrap" id="g-light-use">
-        <span class="tag" onclick="tog(this,'g-light-use')">ポートレート・人物撮影</span>
-        <span class="tag" onclick="tog(this,'g-light-use')">動画・YouTube・配信</span>
-        <span class="tag" onclick="tog(this,'g-light-use')">商品撮影・物撮り</span>
-        <span class="tag" onclick="tog(this,'g-light-use')">屋外ロケ・現場撮影</span>
-        <span class="tag" onclick="tog(this,'g-light-use')">スタジオ本格撮影</span>
-      </div>
-    </div>
-    <div class="step-block">
-      <div class="step-header"><span class="step-num">02</span><span class="step-title">使用する光源の種類は？</span></div>
-      <div class="step-note">光源の重量によってスタンドの耐荷重が大きく変わります</div>
-      <div class="tag-wrap" id="g-light-type">
-        <span class="tag" onclick="tog(this,'g-light-type')">ストロボ / フラッシュ</span>
-        <span class="tag" onclick="tog(this,'g-light-type')">LEDライト（定常光）</span>
-        <span class="tag" onclick="tog(this,'g-light-type')">リングライト</span>
-        <span class="tag" onclick="tog(this,'g-light-type')">大型モノブロック</span>
-        <span class="tag" onclick="tog(this,'g-light-type')">まだ決めていない</span>
-      </div>
-    </div>
-    <div class="step-block">
-      <div class="step-header"><span class="step-num">03</span><span class="step-title">灯数は？</span></div>
-      <div class="tag-wrap" id="g-light-num">
-        <span class="tag" onclick="tog(this,'g-light-num')">1灯（シンプルに始めたい）</span>
-        <span class="tag" onclick="tog(this,'g-light-num')">2灯（メイン + バックライト）</span>
-        <span class="tag" onclick="tog(this,'g-light-num')">3灯以上（本格的なシステム）</span>
-      </div>
-    </div>
-    <div class="step-block">
-      <div class="step-header"><span class="step-num">04</span><span class="step-title">スタンドは必要ですか？</span></div>
-      <div class="tag-wrap" id="g-light-stand">
-        <span class="tag" onclick="tog(this,'g-light-stand')">スタンドも一緒に欲しい</span>
-        <span class="tag" onclick="tog(this,'g-light-stand')">スタンドは既に持っている</span>
-        <span class="tag" onclick="tog(this,'g-light-stand')">アクセサリーのみ（アーム・クランプなど）</span>
-      </div>
-    </div>
-    <div class="step-block">
-      <div class="step-header"><span class="step-num">05</span><span class="step-title">設置場所・スペース</span></div>
-      <div class="tag-wrap" id="g-light-space">
-        <span class="tag" onclick="tog(this,'g-light-space')">スタジオ固定（天井高あり）</span>
-        <span class="tag" onclick="tog(this,'g-light-space')">自宅・小スペース（天井低め）</span>
-        <span class="tag" onclick="tog(this,'g-light-space')">屋外・ロケ（持ち運び必要）</span>
-        <span class="tag" onclick="tog(this,'g-light-space')">卓上・デスク撮影</span>
-      </div>
-    </div>
-    <div class="step-block">
-      <div class="step-header"><span class="step-num">06</span><span class="step-title">アームやブームは必要ですか？</span></div>
-      <div class="tag-wrap" id="g-light-arm">
-        <span class="tag" onclick="tog(this,'g-light-arm')">必要（真上から照らしたい）</span>
-        <span class="tag" onclick="tog(this,'g-light-arm')">不要（通常の斜め上からで十分）</span>
-        <span class="tag" onclick="tog(this,'g-light-arm')">わからない</span>
-      </div>
-    </div>
-    <div class="step-block">
-      <div class="step-header"><span class="step-num">07</span><span class="step-title">背景紙・バックドロップは必要ですか？</span></div>
-      <div class="tag-wrap" id="g-light-backdrop">
-        <span class="tag" onclick="tog(this,'g-light-backdrop')">必要（背景システムも欲しい）</span>
-        <span class="tag" onclick="tog(this,'g-light-backdrop')">不要（背景は別途用意している）</span>
-      </div>
-    </div>
-    <div class="step-block">
-      <div class="step-header"><span class="step-num">08</span><span class="step-title">携帯性・安定性のこだわりは？</span></div>
-      <div class="tag-wrap" id="g-light-portable">
-        <span class="tag" onclick="tog(this,'g-light-portable')">軽量・コンパクト重視（ロケ多め）</span>
-        <span class="tag" onclick="tog(this,'g-light-portable')">安定性・頑丈さ重視（スタジオ固定）</span>
-        <span class="tag" onclick="tog(this,'g-light-portable')">こだわらない</span>
-      </div>
-    </div>
-  </div>
-
-  <!-- ===== OTHER ===== -->
-  <div class="step-wrap" id="f-other">
-    <div class="step-block">
-      <div class="step-header"><span class="step-num">01</span><span class="step-title">お探しの商品を教えてください</span></div>
-      <input type="text" id="other-txt" placeholder="例：スマートフォンホルダー、クランプ、スライダー..."/>
-    </div>
-  </div>
-
-  <!-- EXTRA + SUBMIT -->
-  <div id="extra-wrap" style="display:none">
-    <div class="divider"><span>追加情報（任意）</span></div>
-    <div class="form-group">
-      <span class="form-label">予算・その他のご希望</span>
-      <input type="text" id="extra-txt" placeholder="例：予算2万円以内、軽量希望、旅行によく持ち歩く..."/>
-    </div>
-    <button class="cta-btn" id="send-btn" onclick="doSend()">おすすめ商品を探す →</button>
-  </div>
-
-  <!-- RESULTS -->
-  <div id="result-area">
-    <div class="result-header" id="result-header"></div>
-    <div id="result-body"></div>
-    <button class="reset-btn" onclick="location.reload()">← 最初からやり直す</button>
-  </div>
-
-</div>
-
-<div class="footer-strip">
-  <span class="footer-logo">Manfrotto</span>
-  <span class="footer-sep"></span>
-  <span class="footer-tag">AI Product Advisor</span>
 </div>
 
 <script>
-let cat = null;
-const groups = {};
-const combos = {};
-let selectedHeadType = '';
+let lang = 'ja';
+let history = [];
+let isLoading = false;
+let recognition = null;
+let isRecording = false;
 
-function pickCat(c) {
-  document.querySelectorAll('.cat-item').forEach(b => b.classList.remove('active'));
-  document.getElementById('c-' + c).classList.add('active');
-  document.querySelectorAll('.step-wrap').forEach(f => f.classList.remove('show'));
-  document.getElementById('f-' + c).classList.add('show');
-  document.getElementById('placeholder').style.display = 'none';
-  document.getElementById('extra-wrap').style.display = 'block';
-  document.getElementById('result-area').style.display = 'none';
-  cat = c;
-  window.scrollTo({ top: document.querySelector('.main').offsetTop - 20, behavior: 'smooth' });
-}
+const i18n = {
+  ja: {
+    welcomeTitle: 'Find Your\nPerfect Gear',
+    welcomeSub: '気になる製品カテゴリーや用途を教えてください。\n最適なManfrotto製品をご提案します。',
+    placeholder: 'メッセージを入力...',
+    userAvatar: 'あ',
+    introText: (n) => `ご条件に合う製品を${n}点ご提案します。各製品をタップすると購入リンクが表示されます。`,
+    errorText: 'エラーが発生しました。もう一度お試しください。',
+    listening: '🎤 話しかけてください...',
+    noSpeech: 'このブラウザは音声入力に対応していません。Chrome または Edge をご利用ください。',
+    bic: 'ビックカメラ',
+    yodo: 'ヨドバシカメラ',
+    amazon: 'Amazon Japan',
+    chips: [
+      '三脚を探したい',
+      'カメラバッグを探したい',
+      '雲台を探したい',
+      '一脚を探したい',
+      '照明スタンドを探したい'
+    ]
+  },
+  en: {
+    welcomeTitle: 'Find Your\nPerfect Gear',
+    welcomeSub: "Tell me what you're looking for and I'll help you find the perfect Manfrotto product.",
+    placeholder: 'Type your message...',
+    userAvatar: 'U',
+    introText: (n) => `Here are ${n} products that match your needs. Tap each to see purchase links.`,
+    errorText: 'An error occurred. Please try again.',
+    listening: '🎤 Listening...',
+    noSpeech: 'Voice input is not supported in this browser. Please use Chrome or Edge.',
+    bic: 'Bic Camera',
+    yodo: 'Yodobashi Camera',
+    amazon: 'Amazon Japan',
+    chips: [
+      "I'm looking for a tripod",
+      "I need a camera bag",
+      "I'm looking for a ball head",
+      "I need a monopod",
+      "I'm looking for a lighting stand"
+    ]
+  }
+};
 
-function tog(el, gid) {
-  el.classList.toggle('on');
-  if (!groups[gid]) groups[gid] = new Set();
-  if (el.classList.contains('on')) groups[gid].add(el.textContent.trim());
-  else groups[gid].delete(el.textContent.trim());
-}
+function setLang(l) {
+  lang = l;
+  document.querySelectorAll('.lang-btn').forEach(b => b.classList.remove('active'));
+  document.querySelector(`.lang-btn[onclick="setLang('${l}')"]`).classList.add('active');
+  const t = i18n[l];
+  const wt = document.getElementById('welcome-title');
+  const ws = document.getElementById('welcome-sub');
+  if (wt) wt.innerHTML = t.welcomeTitle.replace('\n', '<br>');
+  if (ws) ws.innerHTML = t.welcomeSub.replace('\n', '<br>');
+  document.getElementById('input-field').placeholder = t.placeholder;
 
-function pickCombo(el, key, label) {
-  document.querySelectorAll(`#g-${key}-weight .combo-card`).forEach(c => c.classList.remove('on'));
-  el.classList.add('on');
-  combos[key] = label;
-}
-
-function pickType(el) {
-  document.querySelectorAll('#g-head-type .type-card').forEach(c => c.classList.remove('on'));
-  el.classList.add('on');
-  selectedHeadType = el.querySelector('.type-name').textContent;
-}
-
-function checkPC(el) {
-  const hasPc = Array.from(document.querySelectorAll('#g-personal .tag'))
-    .some(t => t.classList.contains('on') && t.textContent.includes('普段使い'));
-  document.getElementById('cond-pc').classList.toggle('show', hasPc);
-}
-
-function checkVideo(condId, sn1Id, sn2Id, base1, base2) {
-  const gid = condId === 'cond-video' ? 'g-tripod-use' : 'g-head-use';
-  const hasVideo = Array.from(document.querySelectorAll(`#${gid} .tag`))
-    .some(t => t.classList.contains('on') && t.textContent.includes('動画'));
-  document.getElementById(condId).classList.toggle('show', hasVideo);
-  const offset = hasVideo ? 1 : 0;
-  document.getElementById(sn1Id).textContent = base1 + offset;
-  document.getElementById(sn2Id).textContent = base2 + offset;
-  if (condId === 'cond-head-video') {
-    const sn3 = document.getElementById('sn-head-tripod');
-    if (sn3) sn3.textContent = 6 + offset;
+  // Update quick reply chips
+  const chipsWrap = document.querySelector('.welcome-chips');
+  if (chipsWrap) {
+    chipsWrap.innerHTML = t.chips.map(c =>
+      `<span class="welcome-chip" onclick="sendQuick(this.textContent)">${c}</span>`
+    ).join('');
   }
 }
 
-function getVals(gid) {
-  return groups[gid] ? [...groups[gid]].join('・') : '';
+function autoResize(el) {
+  el.style.height = 'auto';
+  el.style.height = Math.min(el.scrollHeight, 120) + 'px';
 }
 
-function buildMessage() {
-  const catLabel = { bag:'カメラバッグ', tripod:'三脚', head:'雲台', monopod:'一脚', light:'照明スタンド・アクセサリー', other:'アクセサリー' }[cat];
-  const extra = document.getElementById('extra-txt').value.trim();
-  const other = document.getElementById('other-txt') ? document.getElementById('other-txt').value.trim() : '';
+function handleKey(e) {
+  if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMessage(); }
+}
 
-  const fieldMap = {
-    bag: [
-      ['g-bagtype','バッグタイプ'],
-      ['g-gear-combo','持ち出し機材の組み合わせ'],
-      ['g-lens-size','最大レンズサイズ'],
-      ['g-personal','個人荷物の量'],
-      ['g-pc','ノートPCのサイズ'],
-      ['g-tripod-bag','三脚の携帯'],
-      ['g-bag-scene','使用シーン'],
-    ],
-    tripod: [
-      ['g-tripod-purchase','購入タイプ'],
-      ['g-tripod-use','主な用途'],
-      ['g-video-pref','動画のこだわり'],
-      ['g-tripod-mat','素材希望'],
-      ['g-tripod-scene','撮影シーン'],
-    ],
-    head: [
-      ['g-head-use','主な撮影'],
-      ['g-head-weight','機材の組み合わせ'],
-      ['g-head-video','動画のこだわり'],
-      ['g-head-speed','設置スピード'],
-      ['g-head-level','水平精度'],
-      ['g-head-tripod','三脚との組み合わせ'],
-    ],
-    monopod: [
-      ['g-mono-use','用途'],
-      ['g-mono-weight','機材の組み合わせ'],
-      ['g-mono-head','雲台の有無'],
-      ['g-mono-self','自立機能'],
-      ['g-mono-lock','ロック方式'],
-      ['g-mono-tip','石突タイプ'],
-      ['g-mono-sections','段数・携帯サイズ'],
-      ['g-mono-mat','素材'],
-    ],
-    light: [
-      ['g-light-use','用途'],
-      ['g-light-type','光源の種類'],
-      ['g-light-num','灯数'],
-      ['g-light-stand','スタンドの有無'],
-      ['g-light-space','設置場所'],
-      ['g-light-arm','アーム・ブームの必要性'],
-      ['g-light-backdrop','バックドロップの必要性'],
-      ['g-light-portable','携帯性・安定性'],
-    ],
-    other: []
-  };
+function sendQuick(text) {
+  document.getElementById('input-field').value = text;
+  sendMessage();
+}
 
-  let msg = `カテゴリー：${catLabel}\n`;
-  if (cat === 'head' && selectedHeadType) msg += `雲台タイプ：${selectedHeadType}\n`;
-  for (const [gid, label] of (fieldMap[cat] || [])) {
-    const v = getVals(gid);
-    if (v) msg += `${label}：${v}\n`;
+function hideWelcome() {
+  const w = document.getElementById('welcome');
+  if (w) w.remove();
+}
+
+function appendMsg(role, content) {
+  hideWelcome();
+  const chat = document.getElementById('chat');
+  const t = i18n[lang];
+
+  const div = document.createElement('div');
+  div.className = `msg ${role}`;
+
+  const avatar = document.createElement('div');
+  avatar.className = 'msg-avatar';
+  if (role === 'bot') {
+    avatar.innerHTML = '<img src="/images/manfrotto-logo.png" alt="M">';
+  } else {
+    avatar.textContent = t.userAvatar;
   }
-  if (combos[cat]) msg += `機材の組み合わせ・推奨耐荷重：${combos[cat]}\n`;
-  if (other) msg += `希望内容：${other}\n`;
-  if (extra) msg += `その他希望：${extra}\n`;
-  msg += '\nmanfrotto.com から実在する商品を3点推薦してください。各商品について、商品名、SKU型番、推薦理由（2〜3文）、manfrotto.comの商品ページURLを教えてください。';
-  return msg;
+
+  const bubble = document.createElement('div');
+  bubble.className = 'msg-bubble';
+
+  if (role === 'bot' && typeof content === 'object' && content.type === 'products') {
+    const intro = document.createElement('div');
+    intro.className = 'product-intro';
+    intro.textContent = t.introText(content.items.length);
+    bubble.appendChild(intro);
+
+    const wrap = document.createElement('div');
+    wrap.className = 'products-wrap';
+
+    content.items.forEach((p, i) => {
+      const sku = (p.sku || '').toString().trim();
+      const card = document.createElement('div');
+      card.className = 'product-card';
+      card.innerHTML = `
+        <div class="product-card-header" onclick="toggleCard(this.parentElement)">
+          <div class="product-card-img">
+            <img src="/images/hero-tripod.png" alt="${p.name}" onerror="this.src='/images/hero-tripod.png'">
+          </div>
+          <div class="product-card-info">
+            <div class="product-card-num">0${i + 1}</div>
+            <div class="product-card-name">${p.name}</div>
+            <div class="product-card-sku">${sku}</div>
+            ${p.price ? `<div class="product-card-price">¥${Number(p.price).toLocaleString()}</div>` : ''}
+          </div>
+          <div class="product-card-chevron">▼</div>
+        </div>
+        <div class="product-card-body">
+          <div class="product-reason">${p.reason}</div>
+          <div class="store-links">
+            <a class="store-link" href="https://www.biccamera.com/bc/category/?q=${encodeURIComponent(sku)}" target="_blank" rel="noopener">
+              <div class="store-link-left"><div class="store-icon bic">B</div><span class="store-name">${t.bic}</span></div>
+              <span class="store-arrow">→</span>
+            </a>
+            <a class="store-link" href="https://www.yodobashi.com/?word=${encodeURIComponent(sku)}" target="_blank" rel="noopener">
+              <div class="store-link-left"><div class="store-icon yodo">Y</div><span class="store-name">${t.yodo}</span></div>
+              <span class="store-arrow">→</span>
+            </a>
+            <a class="store-link" href="https://www.amazon.co.jp/s?k=${encodeURIComponent(sku)}" target="_blank" rel="noopener">
+              <div class="store-link-left"><div class="store-icon amazon">A</div><span class="store-name">${t.amazon}</span></div>
+              <span class="store-arrow">→</span>
+            </a>
+          </div>
+        </div>`;
+      wrap.appendChild(card);
+    });
+    bubble.appendChild(wrap);
+  } else {
+    bubble.innerHTML = (typeof content === 'string' ? content : '').replace(/\n/g, '<br>');
+  }
+
+  div.appendChild(avatar);
+  div.appendChild(bubble);
+  chat.appendChild(div);
+  chat.scrollTop = chat.scrollHeight;
 }
 
-async function doSend() {
-  if (!cat) return;
-  const btn = document.getElementById('send-btn');
-  btn.disabled = true;
-  const resultArea = document.getElementById('result-area');
-  resultArea.style.display = 'block';
-  document.getElementById('result-header').innerHTML = `
-    <div class="loading-wrap">
-      <div class="dots"><div class="dot"></div><div class="dot"></div><div class="dot"></div></div>
-      manfrotto.com を検索中...
-    </div>`;
-  document.getElementById('result-body').innerHTML = '';
-  resultArea.scrollIntoView({ behavior: 'smooth', block: 'start' });
+function toggleCard(card) { card.classList.toggle('open'); }
+
+function showTyping() {
+  hideWelcome();
+  const chat = document.getElementById('chat');
+  const div = document.createElement('div');
+  div.className = 'msg bot';
+  div.id = 'typing-msg';
+  const avatar = document.createElement('div');
+  avatar.className = 'msg-avatar';
+  avatar.style.cssText = 'background:white;border:1px solid #e8e8e8;padding:4px';
+  avatar.innerHTML = '<img src="/images/manfrotto-logo.png" alt="M">';
+  const indicator = document.createElement('div');
+  indicator.className = 'typing-indicator';
+  indicator.innerHTML = '<div class="typing-dot"></div><div class="typing-dot"></div><div class="typing-dot"></div>';
+  div.appendChild(avatar);
+  div.appendChild(indicator);
+  chat.appendChild(div);
+  chat.scrollTop = chat.scrollHeight;
+}
+
+function removeTyping() {
+  const el = document.getElementById('typing-msg');
+  if (el) el.remove();
+}
+
+async function sendMessage() {
+  if (isLoading) return;
+  const field = document.getElementById('input-field');
+  const text = field.value.trim();
+  if (!text) return;
+
+  field.value = '';
+  field.style.height = 'auto';
+  isLoading = true;
+  document.getElementById('send-btn').disabled = true;
+
+  appendMsg('user', text);
+  history.push({ role: 'user', content: text });
+  showTyping();
 
   try {
     const res = await fetch('/api/chat', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ message: buildMessage() })
+      body: JSON.stringify({ messages: history })
     });
+
     const data = await res.json();
-    if (!res.ok) throw new Error(data.error || 'API error');
-    document.getElementById('result-header').textContent = 'おすすめ商品';
+    removeTyping();
+    if (!res.ok) throw new Error(data.error || 'Error');
+
     const reply = data.reply || '';
-    if (reply.includes('class="product"') || reply.includes('<div')) {
-      document.getElementById('result-body').innerHTML = reply;
-      document.querySelectorAll('.product').forEach(p => {
-        if (!p.querySelector('.product-img-wrap')) {
-          const imgWrap = document.createElement('div');
-          imgWrap.className = 'product-img-wrap';
-          imgWrap.innerHTML = `<img src="/images/hero-tripod.png" alt="product">`;
-          p.insertBefore(imgWrap, p.firstChild);
-        }
-      });
+    history.push({ role: 'assistant', content: reply });
+
+    const jsonMatch = reply.match(/\{"type":"products"[\s\S]*\}/);
+    if (jsonMatch) {
+      try {
+        appendMsg('bot', JSON.parse(jsonMatch[0]));
+      } catch {
+        appendMsg('bot', reply);
+      }
     } else {
-      document.getElementById('result-body').innerHTML = `<div style="font-size:13px;line-height:1.9;color:#333;white-space:pre-wrap">${reply}</div>`;
+      appendMsg('bot', reply);
     }
   } catch (e) {
-    document.getElementById('result-header').textContent = 'エラーが発生しました';
-    document.getElementById('result-body').innerHTML = `<div class="error-msg">${e.message}</div>`;
+    removeTyping();
+    appendMsg('bot', i18n[lang].errorText);
   }
-  btn.disabled = false;
+
+  isLoading = false;
+  document.getElementById('send-btn').disabled = false;
+  document.getElementById('input-field').focus();
 }
+
+function toggleVoice() {
+  if (!('webkitSpeechRecognition' in window) && !('SpeechRecognition' in window)) {
+    alert(i18n[lang].noSpeech); return;
+  }
+  if (isRecording) { recognition.stop(); return; }
+
+  const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+  recognition = new SR();
+  recognition.lang = lang === 'ja' ? 'ja-JP' : 'en-US';
+  recognition.interimResults = true;
+  recognition.continuous = false;
+
+  recognition.onstart = () => {
+    isRecording = true;
+    document.getElementById('mic-btn').classList.add('recording');
+    document.getElementById('input-field').placeholder = i18n[lang].listening;
+  };
+  recognition.onresult = (e) => {
+    const t = Array.from(e.results).map(r => r[0].transcript).join('');
+    document.getElementById('input-field').value = t;
+    autoResize(document.getElementById('input-field'));
+  };
+  recognition.onend = () => {
+    isRecording = false;
+    document.getElementById('mic-btn').classList.remove('recording');
+    document.getElementById('input-field').placeholder = i18n[lang].placeholder;
+    const t = document.getElementById('input-field').value.trim();
+    if (t) sendMessage();
+  };
+  recognition.onerror = () => {
+    isRecording = false;
+    document.getElementById('mic-btn').classList.remove('recording');
+    document.getElementById('input-field').placeholder = i18n[lang].placeholder;
+  };
+  recognition.start();
+}
+
+// Initialize chips on load
+setLang('ja');
 </script>
 </body>
 </html>
