@@ -25,7 +25,7 @@ function getProductSample(category) {
     const items = Array.isArray(d) ? d : [...(d.photo||[]), ...(d.video||[])];
     return {
       count: items.length,
-      samples: items.slice(0, 3).map(p => `${p.name}（${p.sku}）`).join('、')
+      samples: items.slice(0, 8).map(p => `${p.name}（${p.sku}）`).join('\n')
     };
   } catch { return null; }
 }
@@ -45,8 +45,7 @@ const FLOWS = {
 2. 持ち出し機材を確認 → options:["1台+レンズ1〜2本","1台+レンズ3〜4本","2台以上"]
 3. 最大レンズサイズを確認 → options:["標準ズーム","70-200mm","超望遠","シネレンズ"]
 4. 個人荷物の量を確認 → options:["機材のみ","少し","普段使いも"]
-5. 三脚を持ち歩くか確認 → options:["持ち歩かない","小型三脚","大型三脚"]
-6. 使用シーンを確認 → options:["旅行・登山","街撮り","プロ撮影","動画"]`,
+5. 使用シーンを確認 → options:["旅行・登山","街撮り","プロ撮影","動画"]`,
 
     heads: `【雲台の質問フロー】この順番で1つずつ質問：
 1. 雲台タイプを確認 → options:["ボールヘッド","フルードヘッド","3ウェイ","ギア","わからない"]
@@ -87,8 +86,7 @@ const FLOWS = {
 2. Gear for one outing → options:["1 body + 1-2 lenses","1 body + 3-4 lenses","2+ bodies"]
 3. Largest lens → options:["Standard zoom","70-200mm","Super telephoto","Cine lens"]
 4. Personal items → options:["Gear only","A little","Everyday use too"]
-5. Tripod carry → options:["No tripod","Compact tripod","Full-size tripod"]
-6. Main scene → options:["Travel/hiking","Street","Professional","Video"]`,
+5. Main scene → options:["Travel/hiking","Street","Professional","Video"]`,
 
     heads: `[Head Flow] Ask ONE question at a time in this order:
 1. Head type → options:["Ball head","Fluid head","3-way","Gear head","Not sure"]
@@ -133,12 +131,23 @@ function buildGuidancePrompt(lang, category) {
     ? '必ず日本語で回答してください。'
     : 'Always respond in English.';
 
-  // Get real product samples to prove data exists
-  const sample = category ? getProductSample(category) : null;
-  const dataNote = sample
+  // Load full product data to show Claude the data EXISTS
+  let productListStr = '';
+  if (category) {
+    const d = loadMini(`${category}.json`);
+    if (d) {
+      const items = Array.isArray(d) ? d : [...(d.photo||[]), ...(d.video||[])];
+      // Only pass sku + name to save tokens
+      const slim = items.map(p => `${p.sku}|${p.name}`).join('\n');
+      productListStr = lang === 'ja'
+        ? `\n【製品リスト（${items.length}件）— これらは全て実在するManfrotto製品です】\n${slim}`
+        : `\n[Product List (${items.length} items — all real Manfrotto products)]\n${slim}`;
+    }
+  }
+  const dataNote = productListStr
     ? (lang === 'ja'
-      ? `\n【重要】データベースに${sample.count}件の製品があります：${sample.samples}\nこれらは実在するManfrotto製品です。絶対に「取り扱いがない」と言わないでください。`
-      : `\n[IMPORTANT] Database has ${sample.count} real products: ${sample.samples}\nNEVER say Manfrotto doesn't carry this product type.`)
+      ? `${productListStr}\n【絶対厳守】上記の製品は全て実在するManfrotto製品です。「データがない」「取り扱いがない」は絶対に言わないでください。`
+      : `${productListStr}\n[MANDATORY] All products above are REAL Manfrotto products. NEVER say they don't exist.`)
     : '';
 
   const exampleJa = `{"message":"動画撮影がメインですね！使用されるカメラを教えてください。","options":["Sony","Canon","Nikon","Fujifilm","その他"]}`;
@@ -159,10 +168,14 @@ CAMERA WEIGHT: ${CAMERA_REF}
 
 Do NOT recommend products yet — keep gathering information.
 
-RESPONSE FORMAT — strict JSON only, nothing else:
+RESPONSE FORMAT — output ONLY this JSON, nothing else:
 {"message":"warm acknowledgment + one question","options":["opt1","opt2","opt3"]}
 
-RULES: options array MUST always have 3-5 items. Use the options shown in the flow above.
+⚠️ MANDATORY RULES:
+1. Output MUST be valid JSON only — no markdown, no extra text
+2. "options" array MUST contain 3-5 items — NEVER empty, NEVER omit
+3. Use the exact options shown after "→" in the flow above
+4. Each option must be short (under 12 characters)
 
 Example: ${lang === 'ja' ? exampleJa : exampleEn}`;
 }
@@ -222,8 +235,8 @@ export default async function handler(req, res) {
 
   const recommendSignals = /以上です|おすすめして|推薦して|お願いします|please recommend|show me products|suggest products/i;
   const shouldRecommend = category &&
-    userMessages.length >= 5 &&
-    (userMessages.length >= 7 || recommendSignals.test(lastUserMsg));
+    userMessages.length >= 3 &&
+    (userMessages.length >= 5 || recommendSignals.test(lastUserMsg));
 
   const phase = shouldRecommend ? 'RECOMMEND' : 'GUIDE';
   const systemPrompt = shouldRecommend
@@ -247,7 +260,7 @@ export default async function handler(req, res) {
           { role: 'system', content: systemPrompt },
           ...messages
         ],
-        temperature: 0.2,
+        temperature: 0.1,
         max_tokens: 1000
       })
     });
@@ -264,6 +277,20 @@ export default async function handler(req, res) {
       parsed = match ? JSON.parse(match[0]) : null;
     } catch {
       parsed = null;
+    }
+
+    // If parse failed but we got text, wrap it with empty options
+    if (!parsed && raw) {
+      parsed = { message: raw.replace(/\*\*/g, ''), options: [] };
+    }
+
+    // If options is missing or empty, add default options based on category
+    if (parsed && !parsed.type && (!parsed.options || parsed.options.length === 0)) {
+      const defaultOptions = {
+        ja: { tripods: ['写真メイン','動画メイン','両方'], bags: ['バックパック','ショルダー','ウエスト'], heads: ['ボールヘッド','フルードヘッド','わからない'], monopods: ['スポーツ','動画','登山'], lighting: ['ポートレート','動画','商品撮影'] },
+        en: { tripods: ['Photo','Video','Both'], bags: ['Backpack','Shoulder','Waist'], heads: ['Ball head','Fluid head','Not sure'], monopods: ['Sports','Video','Hiking'], lighting: ['Portrait','Video','Product'] }
+      };
+      parsed.options = defaultOptions[lang]?.[category] || [];
     }
 
     // Enrich product prices from DB
