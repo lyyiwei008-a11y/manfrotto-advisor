@@ -44,7 +44,7 @@ body {
   z-index: 100;
 }
 .header-left { display: flex; align-items: center; gap: 14px; }
-.header-logo { height: 32px; width: auto; max-width: 180px; object-fit: contain; display: block; mix-blend-mode: multiply; }
+.header-logo { height: 32px; width: auto; max-width: 180px; object-fit: contain; display: block; }
 .header-divider { width: 1px; height: 16px; background: var(--gray-200); }
 .header-title {
   font-family: 'Barlow Condensed', sans-serif;
@@ -106,12 +106,14 @@ body {
   display: flex; align-items: center; justify-content: center;
   overflow: hidden;
 }
-.msg.bot .msg-avatar { background: var(--white); border: 1px solid var(--gray-200); padding: 4px; }
-.msg.bot .msg-avatar img { width: 100%; height: auto; object-fit: contain; }
-.msg.user .msg-avatar {
-  background: var(--gray-100); border: 1px solid var(--gray-200);
-  font-family: 'Barlow Condensed', sans-serif; font-size: 13px; font-weight: 700; color: var(--gray-400);
+.msg.bot .msg-avatar {
+  background: var(--black);
 }
+.msg.bot .msg-avatar svg { width: 18px; height: 18px; fill: none; stroke: white; stroke-width: 1.5; stroke-linecap: round; stroke-linejoin: round; }
+.msg.user .msg-avatar {
+  background: var(--gray-200);
+}
+.msg.user .msg-avatar svg { width: 16px; height: 16px; fill: none; stroke: var(--gray-700); stroke-width: 1.5; stroke-linecap: round; stroke-linejoin: round; }
 
 .msg-bubble { max-width: 75%; padding: 12px 16px; font-size: 14px; line-height: 1.7; }
 .msg.bot .msg-bubble { background: var(--gray-100); border-radius: 0 12px 12px 12px; color: var(--black); }
@@ -258,7 +260,7 @@ body {
 
 <header class="header">
   <div class="header-left">
-    <img class="header-logo" src="/images/manfrotto-logo.png" alt="Manfrotto">
+    <img class="header-logo" src="/images/manfrotto-logo.jpg" alt="Manfrotto">
     <div class="header-divider"></div>
     <span class="header-title">Product Advisor</span>
   </div>
@@ -412,9 +414,11 @@ function appendMsg(role, content) {
   const avatar = document.createElement('div');
   avatar.className = 'msg-avatar';
   if (role === 'bot') {
-    avatar.innerHTML = '<img src="/images/manfrotto-logo.png" alt="M">';
+    // Robot / AI icon
+    avatar.innerHTML = `<svg viewBox="0 0 24 24"><rect x="3" y="8" width="18" height="13" rx="2"></rect><path d="M12 8V5"></path><circle cx="12" cy="4" r="1"></circle><circle cx="8.5" cy="13" r="1.5" fill="white" stroke="none"></circle><circle cx="15.5" cy="13" r="1.5" fill="white" stroke="none"></circle><path d="M8 17h8"></path></svg>`;
   } else {
-    avatar.textContent = t.userAvatar;
+    // User icon
+    avatar.innerHTML = `<svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>`;
   }
 
   const bubble = document.createElement('div');
@@ -486,8 +490,8 @@ function showTyping() {
   div.id = 'typing-msg';
   const avatar = document.createElement('div');
   avatar.className = 'msg-avatar';
-  avatar.style.cssText = 'background:white;border:1px solid #e8e8e8;padding:4px';
-  avatar.innerHTML = '<img src="/images/manfrotto-logo.png" alt="M">';
+  avatar.style.background = '#0a0a0a';
+  avatar.innerHTML = `<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="8" width="18" height="13" rx="2"></rect><path d="M12 8V5"></path><circle cx="12" cy="4" r="1"></circle><circle cx="8.5" cy="13" r="1.5" fill="white" stroke="none"></circle><circle cx="15.5" cy="13" r="1.5" fill="white" stroke="none"></circle><path d="M8 17h8"></path></svg>`;
   const indicator = document.createElement('div');
   indicator.className = 'typing-indicator';
   indicator.innerHTML = '<div class="typing-dot"></div><div class="typing-dot"></div><div class="typing-dot"></div>';
