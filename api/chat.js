@@ -144,7 +144,9 @@ ${flow}
 CAMERA WEIGHT REFERENCE:
 ${CAMERA_REF}
 
-WEIGHT RULE: Recommend payload = (camera + lens weight) × 2 minimum
+IMPORTANT: You DO have a product database. When you have enough info, you will recommend real products.
+Do NOT tell customers you don't have products — you will recommend them when the time comes.
+Do NOT recommend products yet — just gather information through conversation.
 
 RESPONSE FORMAT (strict JSON only, no text outside):
 {"message":"Your warm response + next question","options":["choice1","choice2","choice3","choice4"]}
@@ -175,7 +177,11 @@ CUSTOMER NEEDS: ${summary}
 CAMERA DATABASE: ${cameraData ? JSON.stringify(cameraData.cameras) : ''}
 
 PRODUCT DATABASE (recommend ONLY from this list, never invent products):
-${productData ? JSON.stringify(productData) : 'No data'}
+${productData ? JSON.stringify(productData) : 'No data available for this category'}
+
+IMPORTANT: The product database above contains real Manfrotto products. 
+Use ONLY products listed above. Do NOT say the database is empty if data is shown above.
+Total products available: ${productData ? (Array.isArray(productData) ? productData.length : Object.values(productData).flat().length) : 0}
 
 WEIGHT SAFETY: payload_kg must be ≥ (camera + lens weight) × 2
 
@@ -201,9 +207,9 @@ export default async function handler(req, res) {
   const userMessages = messages.filter(m => m.role === 'user');
   const lastUserMsg = userMessages[userMessages.length - 1]?.content || '';
 
-  const recommendSignals = /以上です|それで|おすすめ|推薦|recommend|that's all|決めて|お願い|please recommend/i;
+  const recommendSignals = /以上です|それで|おすすめ|推薦|recommend|that'?s all|決めて|お願い|please recommend|show me|suggest/i;
   const shouldRecommend = category &&
-    userMessages.length >= 3 &&
+    userMessages.length >= 4 &&
     (userMessages.length >= 6 || recommendSignals.test(lastUserMsg));
 
   const systemPrompt = shouldRecommend
