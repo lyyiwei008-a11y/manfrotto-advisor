@@ -161,6 +161,32 @@ export default async function handler(req, res) {
       parsed = null;
     }
 
+    // If product recommendation, fetch images from manfrotto.com
+    if (parsed && parsed.type === 'products' && parsed.items) {
+      parsed.items = await Promise.all(parsed.items.map(async (p) => {
+        try {
+          const sku = (p.sku || '').toString().trim().toUpperCase();
+          const url = `https://www.manfrotto.com/jp-ja/${sku.toLowerCase()}/`;
+          const pageRes = await fetch(url, {
+            headers: { 'User-Agent': 'Mozilla/5.0' },
+            signal: AbortSignal.timeout(4000)
+          });
+          const html = await pageRes.text();
+
+          // Try og:image first
+          const ogMatch = html.match(/<meta[^>]*property=["']og:image["'][^>]*content=["']([^"']+)["']/i)
+                       || html.match(/<meta[^>]*content=["']([^"']+)["'][^>]*property=["']og:image["']/i);
+          if (ogMatch?.[1]) { p.image = ogMatch[1]; return p; }
+
+          // Try cdn.manfrotto.com image
+          const cdnMatch = html.match(/https:\/\/cdn\.manfrotto\.com\/media\/catalog\/product[^"'\s]+\.(jpg|png|webp)/i);
+          if (cdnMatch) { p.image = cdnMatch[0]; return p; }
+
+        } catch { /* image fetch failed, use default */ }
+        return p;
+      }));
+    }
+
     res.status(200).json({
       reply: parsed || { message: raw, options: [] },
       phase,
