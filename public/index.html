@@ -3,14 +3,16 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Manfrotto Product Advisor</title>
-<link href="https://fonts.googleapis.com/css2?family=Barlow:wght@300;400;500;600&family=Barlow+Condensed:wght@400;500;600;700&family=Noto+Sans+JP:wght@300;400;500&display=swap" rel="stylesheet">
+<title>Vitec Product Advisor</title>
+<link href="https://fonts.googleapis.com/css2?family=Barlow:wght@300;400;500;600&family=Barlow+Condensed:wght@400;500;600;700;800&family=Noto+Sans+JP:wght@300;400;500&display=swap" rel="stylesheet">
 <style>
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 :root {
   --red: #e8192c;
   --black: #0a0a0a;
+  --gray-800: #222;
   --gray-700: #444;
+  --gray-500: #777;
   --gray-400: #999;
   --gray-200: #e8e8e8;
   --gray-100: #f5f5f5;
@@ -29,110 +31,74 @@ body {
   -webkit-font-smoothing: antialiased;
 }
 
-/* HEADER */
+/* ── HEADER ── */
 .header {
   flex-shrink: 0;
   background: var(--white);
   border-bottom: 1px solid var(--gray-200);
-  padding: 0 clamp(16px, 4vw, 40px);
+  padding: 0 clamp(16px,4vw,40px);
   height: 56px;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  position: sticky;
-  top: 0;
-  z-index: 100;
+  display: flex; align-items: center; justify-content: space-between;
+  position: sticky; top: 0; z-index: 100;
 }
 .header-left { display: flex; align-items: center; gap: 14px; }
-.header-logo { height: 32px; width: auto; max-width: 180px; object-fit: contain; display: block; }
+.header-logo { height: 36px; width: auto; max-width: 160px; object-fit: contain; display: block; }
 .header-divider { width: 1px; height: 16px; background: var(--gray-200); }
 .header-title {
   font-family: 'Barlow Condensed', sans-serif;
-  font-size: 12px;
-  font-weight: 600;
-  letter-spacing: 0.15em;
-  text-transform: uppercase;
-  color: var(--gray-400);
+  font-size: 11px; font-weight: 700; letter-spacing: 0.18em;
+  text-transform: uppercase; color: var(--gray-400);
 }
 .reset-btn {
-  background: none;
-  border: 1px solid var(--gray-200);
+  background: none; border: 1px solid var(--gray-200);
   padding: 5px 12px;
   font-family: 'Barlow Condensed', sans-serif;
-  font-size: 11px;
-  font-weight: 600;
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
-  cursor: pointer;
-  color: var(--gray-400);
-  transition: all 0.15s;
-  display: none;
+  font-size: 11px; font-weight: 600; letter-spacing: 0.1em;
+  text-transform: uppercase; cursor: pointer; color: var(--gray-400);
+  transition: all 0.15s; display: none;
 }
 .reset-btn:hover { border-color: var(--black); color: var(--black); }
 .reset-btn.visible { display: block; }
 .lang-btn {
-  background: none; border: none;
-  padding: 5px 12px;
+  background: none; border: none; padding: 5px 10px;
   font-family: 'Barlow Condensed', sans-serif;
-  font-size: 11px; font-weight: 600;
-  letter-spacing: 0.1em;
-  cursor: pointer; color: var(--gray-400);
-  transition: all 0.15s;
+  font-size: 11px; font-weight: 600; letter-spacing: 0.1em;
+  cursor: pointer; color: var(--gray-400); transition: all 0.15s;
 }
 .lang-btn.active { background: var(--black); color: var(--white); }
 
-/* CHAT */
+/* ── CHAT ── */
 .chat-container {
-  flex: 1;
-  overflow-y: auto;
-  padding: clamp(24px, 4vw, 40px) clamp(16px, 4vw, 40px) 100px;
-  display: flex;
-  flex-direction: column;
-  gap: 20px;
-  max-width: 800px;
-  width: 100%;
-  margin: 0 auto;
+  flex: 1; overflow-y: auto;
+  padding: clamp(24px,4vw,40px) clamp(16px,4vw,40px) 120px;
+  display: flex; flex-direction: column; gap: 20px;
+  max-width: 800px; width: 100%; margin: 0 auto;
 }
 
-/* MESSAGES */
+/* ── MESSAGES ── */
 .msg { display: flex; gap: 12px; animation: fadeUp 0.25s ease; }
 .msg.user { flex-direction: row-reverse; }
 @keyframes fadeUp { from{opacity:0;transform:translateY(6px)} to{opacity:1;transform:translateY(0)} }
-
 .msg-avatar {
-  width: 32px; height: 32px;
-  border-radius: 50%;
-  flex-shrink: 0;
-  display: flex; align-items: center; justify-content: center;
-  overflow: hidden;
+  width: 32px; height: 32px; border-radius: 50%;
+  flex-shrink: 0; display: flex; align-items: center; justify-content: center; overflow: hidden;
 }
-.msg.bot .msg-avatar {
-  background: var(--black);
-}
+.msg.bot .msg-avatar { background: var(--black); }
 .msg.bot .msg-avatar svg { width: 18px; height: 18px; fill: none; stroke: white; stroke-width: 1.5; stroke-linecap: round; stroke-linejoin: round; }
-.msg.user .msg-avatar {
-  background: var(--gray-200);
-}
+.msg.user .msg-avatar { background: var(--gray-200); }
 .msg.user .msg-avatar svg { width: 16px; height: 16px; fill: none; stroke: var(--gray-700); stroke-width: 1.5; stroke-linecap: round; stroke-linejoin: round; }
-
 .msg-bubble { max-width: 75%; padding: 12px 16px; font-size: 14px; line-height: 1.7; }
 .msg.bot .msg-bubble { background: var(--gray-100); border-radius: 0 12px 12px 12px; color: var(--black); }
 .msg.user .msg-bubble { background: var(--black); border-radius: 12px 0 12px 12px; color: var(--white); }
 
-/* PRODUCT CARDS */
+/* ── PRODUCT CARDS ── */
 .products-wrap { display: flex; flex-direction: column; gap: 8px; margin-top: 8px; width: 100%; }
 .product-intro { font-size: 14px; line-height: 1.7; margin-bottom: 12px; }
-
 .product-card {
-  border: 1px solid var(--gray-200);
-  background: var(--white);
-  transition: border-color 0.15s;
-  cursor: pointer;
+  border: 1px solid var(--gray-200); background: var(--white); transition: border-color 0.15s; cursor: pointer;
 }
 .product-card:hover { border-color: var(--black); }
-
 .product-card-header { display: flex; align-items: center; }
-
 .product-card-info { flex: 1; padding: 14px 16px; }
 .product-card-num {
   font-family: 'Barlow Condensed', sans-serif;
@@ -142,28 +108,21 @@ body {
 .product-card-name { font-family: 'Barlow', sans-serif; font-size: 14px; font-weight: 500; color: var(--black); line-height: 1.3; }
 .product-card-sku { font-family: 'Barlow Condensed', sans-serif; font-size: 11px; letter-spacing: 0.08em; color: var(--gray-400); text-transform: uppercase; margin-top: 2px; }
 .product-card-price { font-size: 12px; color: var(--gray-700); margin-top: 2px; }
-
 .product-card-chevron {
   width: 40px; height: 72px;
   display: flex; align-items: center; justify-content: center;
   color: var(--gray-400); font-size: 11px; flex-shrink: 0;
-  border-left: 1px solid var(--gray-200);
-  transition: transform 0.2s;
+  border-left: 1px solid var(--gray-200); transition: transform 0.2s;
 }
 .product-card.open .product-card-chevron { transform: rotate(180deg); }
-
 .product-card-body { display: none; padding: 14px 16px; border-top: 1px solid var(--gray-200); background: var(--gray-100); }
 .product-card.open .product-card-body { display: block; }
-
 .product-reason { font-size: 13px; color: var(--gray-700); line-height: 1.7; margin-bottom: 14px; }
-
 .store-links { display: flex; flex-direction: column; gap: 6px; }
 .store-link {
   display: flex; align-items: center; justify-content: space-between;
-  padding: 9px 14px;
-  background: var(--white); border: 1px solid var(--gray-200);
-  text-decoration: none;
-  transition: border-color 0.12s, background 0.12s;
+  padding: 9px 14px; background: var(--white); border: 1px solid var(--gray-200);
+  text-decoration: none; transition: border-color 0.12s, background 0.12s;
 }
 .store-link:hover { border-color: var(--black); background: var(--gray-100); }
 .store-link-left { display: flex; align-items: center; gap: 10px; }
@@ -179,101 +138,167 @@ body {
 .store-name { font-family: 'Barlow Condensed', sans-serif; font-size: 12px; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; color: var(--black); }
 .store-arrow { font-size: 12px; color: var(--gray-400); }
 
-/* TYPING */
+/* ── TYPING ── */
 .typing-indicator { display: flex; align-items: center; gap: 4px; padding: 12px 16px; background: var(--gray-100); border-radius: 0 12px 12px 12px; width: fit-content; }
 .typing-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--gray-400); animation: typing 1.2s ease-in-out infinite; }
 .typing-dot:nth-child(2) { animation-delay: 0.2s; }
 .typing-dot:nth-child(3) { animation-delay: 0.4s; }
 @keyframes typing { 0%,60%,100%{transform:translateY(0)} 30%{transform:translateY(-4px)} }
 
-/* OPTIONS BAR */
+/* ── OPTIONS BAR ── */
 .options-bar {
-  position: fixed;
-  bottom: 68px; left: 0; right: 0;
-  padding: 8px clamp(16px, 4vw, 40px);
-  display: none;
-  z-index: 49;
+  position: fixed; bottom: 68px; left: 0; right: 0;
+  padding: 8px clamp(16px,4vw,40px);
+  display: none; z-index: 49;
   background: linear-gradient(to top, rgba(255,255,255,1) 60%, rgba(255,255,255,0));
 }
 .options-bar.visible { display: block; }
 .options-inner {
-  max-width: 800px;
-  margin: 0 auto;
-  display: flex;
-  gap: 8px;
-  flex-wrap: wrap;
+  max-width: 800px; margin: 0 auto;
+  display: flex; gap: 8px; flex-wrap: wrap;
 }
 .option-chip {
-  background: var(--white);
-  border: 1.5px solid var(--gray-200);
+  background: var(--white); border: 1.5px solid var(--gray-200);
   padding: 7px 16px;
   font-family: 'Barlow', 'Noto Sans JP', sans-serif;
-  font-size: 13px;
-  cursor: pointer;
-  color: var(--gray-700);
-  transition: all 0.12s;
-  border-radius: 20px;
-  white-space: nowrap;
+  font-size: 13px; cursor: pointer; color: var(--gray-700);
+  transition: all 0.12s; border-radius: 20px; white-space: nowrap;
   box-shadow: 0 1px 4px rgba(0,0,0,0.08);
 }
 .option-chip:hover { border-color: var(--black); color: var(--black); background: var(--gray-100); }
 
-/* INPUT BAR */
+/* ── INPUT BAR ── */
 .input-bar {
   position: fixed; bottom: 0; left: 0; right: 0;
   background: var(--white); border-top: 1px solid var(--gray-200);
-  padding: 12px clamp(16px, 4vw, 40px); z-index: 50;
+  padding: 12px clamp(16px,4vw,40px); z-index: 50;
 }
 .input-inner { max-width: 800px; margin: 0 auto; display: flex; gap: 8px; align-items: flex-end; }
 .input-field {
   flex: 1; border: 1px solid var(--gray-200); background: var(--gray-100);
-  padding: 10px 16px; font-family: 'Noto Sans JP', sans-serif; font-size: 14px; color: var(--black);
+  padding: 10px 16px;
+  font-family: 'Noto Sans JP', sans-serif; font-size: 14px; color: var(--black);
   outline: none; resize: none; min-height: 44px; max-height: 120px; line-height: 1.5;
   transition: border-color 0.15s; border-radius: 22px;
 }
 .input-field:focus { border-color: var(--black); background: var(--white); }
 .input-field::placeholder { color: var(--gray-400); }
-
 .icon-btn {
   width: 44px; height: 44px; border-radius: 50%; border: none;
   cursor: pointer; display: flex; align-items: center; justify-content: center;
   flex-shrink: 0; transition: all 0.15s;
 }
 .icon-btn svg { width: 18px; height: 18px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
-
 .mic-btn { background: var(--gray-100); border: 1px solid var(--gray-200); color: var(--gray-400); }
 .mic-btn:hover { border-color: var(--black); color: var(--black); }
 .mic-btn.recording { background: var(--red); border-color: var(--red); color: var(--white); animation: mic-pulse 1s ease-in-out infinite; }
 @keyframes mic-pulse { 0%,100%{box-shadow:0 0 0 0 rgba(232,25,44,.4)} 50%{box-shadow:0 0 0 8px rgba(232,25,44,0)} }
-
 .send-btn { background: var(--red); color: var(--white); }
 .send-btn:hover { background: #c8111f; }
 .send-btn:active { transform: scale(0.95); }
 .send-btn:disabled { background: var(--gray-200); cursor: not-allowed; }
 
-/* WELCOME */
+/* ── WELCOME SCREEN ── */
 .welcome {
   display: flex; flex-direction: column; align-items: center; justify-content: center;
-  text-align: center; padding: 48px 24px; flex: 1; min-height: 60vh;
+  text-align: center; padding: 40px 24px 0; flex: 1; min-height: 60vh;
 }
-.welcome-logo { height: 32px; width: auto; margin: 0 auto 24px; display: block; }
+.welcome-vitec-logo {
+  height: 36px; width: auto; margin: 0 auto 6px; display: block;
+ 
+}
 .welcome-title {
   font-family: 'Barlow Condensed', sans-serif;
-  font-size: clamp(26px, 4vw, 40px); font-weight: 600;
-  text-transform: uppercase; letter-spacing: 0.02em;
-  color: var(--black); margin-bottom: 10px; line-height: 1.1;
+  font-size: clamp(22px,3.5vw,34px); font-weight: 700;
+  text-transform: uppercase; letter-spacing: 0.08em;
+  color: var(--black); margin-bottom: 8px; line-height: 1.1;
 }
-.welcome-sub { font-size: 14px; color: var(--gray-400); max-width: 400px; line-height: 1.7; margin-bottom: 28px; }
-.welcome-chips { display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; max-width: 520px; }
-.welcome-chip {
-  background: var(--gray-100); border: 1px solid var(--gray-200);
-  padding: 8px 16px; font-size: 13px; cursor: pointer; color: var(--gray-700);
-  transition: all 0.12s; border-radius: 20px;
+.welcome-sub { font-size: 13px; color: var(--gray-500); max-width: 380px; line-height: 1.7; margin-bottom: 32px; }
+
+/* ── BRAND SELECTOR ── */
+.brand-grid {
+  display: grid; grid-template-columns: repeat(2,1fr); gap: 12px;
+  max-width: 480px; width: 100%; margin-bottom: 20px;
 }
-.welcome-chip:hover { border-color: var(--black); color: var(--black); background: var(--white); }
+.brand-card {
+  border: 1.5px solid var(--gray-200);
+  background: var(--white);
+  padding: 18px 14px;
+  cursor: pointer;
+  transition: all 0.2s;
+  display: flex; align-items: center; justify-content: center;
+  min-height: 72px; position: relative;
+}
+.brand-card:hover { border-color: var(--black); box-shadow: 0 2px 12px rgba(0,0,0,0.08); transform: translateY(-1px); }
+.brand-card.all-brands {
+  grid-column: span 2;
+  min-height: 52px;
+  background: var(--gray-100);
+  border-style: dashed;
+}
+.brand-card.dark-bg {
+  background: #1a1a1a;
+  border-color: #333;
+}
+.brand-card.dark-bg:hover {
+  background: #111;
+  border-color: #555;
+}
+.brand-card.all-brands:hover { background: var(--white); }
+.brand-logo { max-height: 32px; max-width: 130px; width: auto; object-fit: contain; }
+.brand-logo.gitzo { max-height: 22px; }
+.brand-logo.lowepro { max-height: 36px; }
+.brand-logo.manfrotto { max-height: 26px; max-width: 160px; }
+.brand-logo.vitec-small {  max-height: 20px; max-width: 80px; }
+.all-brands-text {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 12px; font-weight: 600; letter-spacing: 0.15em;
+  text-transform: uppercase; color: var(--gray-500);
+  display: flex; align-items: center; gap: 8px;
+}
+.all-brands-text::before { content: ''; width: 20px; height: 1px; background: var(--gray-400); }
+.all-brands-text::after { content: ''; width: 20px; height: 1px; background: var(--gray-400); }
+
+/* ── CATEGORY SELECTOR ── */
+.category-header {
+  display: flex; flex-direction: column; align-items: center; gap: 6px;
+  margin-bottom: 20px;
+}
+.selected-brand-logo { height: 28px; width: auto; object-fit: contain; }
+.selected-brand-logo.gitzo {  max-height: 20px; }
+.selected-brand-logo.manfrotto { }
+.category-label {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 11px; font-weight: 600; letter-spacing: 0.15em;
+  text-transform: uppercase; color: var(--gray-400); margin-top: 4px;
+}
+.category-grid {
+  display: flex; flex-wrap: wrap; justify-content: center; gap: 8px;
+  max-width: 480px; width: 100%; margin-bottom: 16px;
+}
+.category-chip {
+  border: 1.5px solid var(--gray-200);
+  background: var(--white);
+  padding: 9px 18px;
+  font-family: 'Barlow', 'Noto Sans JP', sans-serif;
+  font-size: 13px; cursor: pointer; color: var(--gray-700);
+  transition: all 0.15s; border-radius: 24px;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+}
+.category-chip:hover { border-color: var(--black); color: var(--black); transform: translateY(-1px); }
+.back-link {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 11px; font-weight: 600; letter-spacing: 0.12em;
+  text-transform: uppercase; color: var(--gray-400);
+  cursor: pointer; border: none; background: none;
+  transition: color 0.15s; margin-top: 4px;
+}
+.back-link:hover { color: var(--black); }
+.back-link::before { content: '← '; }
 
 @media (max-width: 560px) {
   .msg-bubble { max-width: 85%; }
+  .brand-grid { grid-template-columns: repeat(2,1fr); max-width: 340px; }
 }
 </style>
 </head>
@@ -281,13 +306,13 @@ body {
 
 <header class="header">
   <div class="header-left">
-    <img class="header-logo" src="/images/manfrotto-logo.jpg" alt="Manfrotto">
+    <img class="header-logo" src="/images/logo-vitec.jpg" alt="Vitec">
     <div class="header-divider"></div>
     <span class="header-title">Product Advisor</span>
   </div>
-  <div class="header-right" style="display:flex;align-items:center;gap:10px">
+  <div style="display:flex;align-items:center;gap:10px">
     <button class="reset-btn" id="reset-btn" onclick="resetChat()">← やり直す</button>
-    <div class="lang-toggle">
+    <div>
       <button class="lang-btn active" onclick="setLang('ja')">日本語</button>
       <button class="lang-btn" onclick="setLang('en')">English</button>
     </div>
@@ -295,11 +320,7 @@ body {
 </header>
 
 <div class="chat-container" id="chat">
-  <div class="welcome" id="welcome">
-    <div class="welcome-title" id="welcome-title">Find Your<br>Perfect Gear</div>
-    <div class="welcome-sub" id="welcome-sub">気になる製品カテゴリーや用途を教えてください。<br>最適なManfrotto製品をご提案します。</div>
-    <div class="welcome-chips" id="welcome-chips"></div>
-  </div>
+  <div class="welcome" id="welcome"></div>
 </div>
 
 <div class="options-bar" id="options-bar">
@@ -309,7 +330,7 @@ body {
 <div class="input-bar">
   <div class="input-inner">
     <textarea class="input-field" id="input-field" rows="1"
-      placeholder="メッセージを入力 / Type your message..."
+      placeholder="メッセージを入力..."
       onkeydown="handleKey(event)"
       oninput="autoResize(this)"></textarea>
     <button class="icon-btn mic-btn" id="mic-btn" onclick="toggleVoice()">
@@ -322,52 +343,191 @@ body {
 </div>
 
 <script>
+const LOGOS = {
+  vitec:     '/images/logo-vitec.jpg',
+  manfrotto: '/images/logo-manfrotto.jpg',
+  gitzo:     '/images/logo-gitzo.jpg',
+  lowepro:   '/images/logo-lowepro.jpg'
+};
+
 let lang = 'ja';
 let history = [];
 let isLoading = false;
 let recognition = null;
 let isRecording = false;
+let selectedBrand = null;
+let selectedCategory = null;
+
+
+// ── 質問フロー選択肢（全てフロント管理） ──
+const FLOW_OPTIONS = {
+  ja: {
+    '三脚': [
+      ['写真撮影メイン','動画撮影メイン','写真・動画両方'],
+      ['〜2kg','2〜5kg','5〜10kg','10kg以上'],
+      ['旅行・登山','街撮り・日常','スタジオ・室内','スポーツ・野鳥','放送・シネマ'],
+      ['カーボン（軽量優先）','アルミ（コスパ優先）','こだわらない'],
+      ['〜3万円','3〜8万円','8〜15万円','15万円以上'],
+    ],
+    '雲台': [
+      ['写真撮影メイン','動画撮影メイン','写真・動画両方'],
+      ['〜2kg','2〜5kg','5〜10kg','10kg以上'],
+      ['Manfrotto三脚と合わせたい','他社三脚を持っている','三脚もこれから購入'],
+      ['〜2万円','2〜5万円','5〜10万円','10万円以上'],
+    ],
+    '一脚': [
+      ['スポーツ・報道','動画・Vlog','登山・旅行','野鳥・超望遠'],
+      ['〜1.5kg','〜2.5kg','〜5kg','5kg以上'],
+      ['一脚のみでよい','雲台セットが欲しい','既に雲台を持っている'],
+      ['カーボン（軽量優先）','アルミ（コスパ優先）','こだわらない'],
+    ],
+    'カメラバッグ': [
+      ['ミラーレス+レンズ2〜3本','一眼+レンズ3〜4本','大型機材複数'],
+      ['標準ズーム程度','70-200mm','超望遠300mm以上'],
+      ['13インチ以下','15インチ','不要'],
+      ['旅行・登山','街撮り・日常','プロ撮影','ドローン運搬'],
+    ],
+    'ライティング': [
+      ['ポートレート','動画・YouTube','商品・物撮り','屋外ロケ'],
+      ['ストロボ','LED','リングライト','大型モノブロック'],
+      ['スタンドも欲しい','既に持っている','アクセサリーのみ'],
+      ['スタジオ固定','自宅・小スペース','屋外移動','卓上'],
+    ],
+    'アクセサリー': [
+      ['カメラ固定・支持','テザー撮影','ライティング補助','その他'],
+      ['三脚','ライトスタンド','カメラ本体','壁・天井'],
+      ['マジックアーム','クランプ','プレート','ストラップ'],
+    ],
+    '三脚（Gitzo）': [
+      ['旅行・登山','風景・長時間露光','野鳥・超望遠','動画・映像制作'],
+      ['〜3kg','3〜6kg','6〜10kg','10kg以上'],
+      ['三脚のみ','雲台もセットで欲しい','既に雲台を持っている'],
+      ['できるだけ軽く小さく','安定性重視','バランス重視'],
+    ],
+    '一脚（Gitzo）': [
+      ['スポーツ・野鳥','風景・旅行','動画・Vlog'],
+      ['〜3kg','3〜6kg','6kg以上'],
+      ['コンパクトに畳みたい','剛性重視','こだわらない'],
+    ],
+    '雲台（Gitzo）': [
+      ['写真撮影','動画撮影','パノラマ・360°'],
+      ['〜5kg','5〜10kg','10〜25kg'],
+      ['Gitzo三脚と合わせたい','他社三脚を持っている','三脚もこれから購入'],
+    ],
+    'バッグ・アクセサリー（Gitzo）': [
+      ['三脚バッグ','カメラバッグ','アクセサリー'],
+      ['コンパクト（トラベラー相当）','中型','大型'],
+    ],
+    'バックパック': [
+      ['ミラーレス+レンズ2〜3本','一眼+レンズ3〜4本','大型機材複数'],
+      ['標準ズーム程度','70-200mm','超望遠・シネレンズ'],
+      ['13インチ以下','15インチ','不要'],
+      ['旅行・登山','街撮り・日常','プロ撮影','ドローン運搬'],
+    ],
+    'ショルダーバッグ': [
+      ['コンパクト1台のみ','カメラ1台+レンズ1本','カメラ+レンズ複数'],
+      ['斜めがけショルダー','スリング','トップローディング'],
+      ['日常・街撮り','旅行','スポーツ・アウトドア'],
+    ],
+    'TLZ・トップローディング': [
+      ['〜24-70mm','〜70-200mm','300mm以上'],
+      ['素早く取り出したい','しっかり保護したい','両方'],
+      ['単独で使う','他のバッグのインサートとして'],
+    ],
+    'レンズ・ハードケース': [
+      ['交換レンズ','カメラ+アクセサリー','バッテリー・小物'],
+      ['小型（〜8cm径）','中型（〜11cm径）','大型（〜13cm径）'],
+      ['バッグのインサート','単独で携帯','スタジオ保管'],
+    ],
+    'ギアアップ・アクセサリー': [
+      ['ケーブル・バッテリー','カメラ本体','レンズ','メモリーカード'],
+      ['バッグのインサート','単独で使う','整理収納'],
+    ],
+  }
+};
+
+let currentStep = 0; // 現在の質問ステップ
+
+// ── カテゴリ定義 ──
+const CATEGORIES = {
+  ja: {
+    Manfrotto: ['三脚','雲台','一脚','カメラバッグ','ライティング','アクセサリー'],
+    Gitzo:     ['三脚（Gitzo）','一脚（Gitzo）','雲台（Gitzo）','バッグ・アクセサリー（Gitzo）'],
+    Lowepro:   ['カメラバッグ'],
+    all:       ['三脚','雲台','一脚','カメラバッグ','ライティング','アクセサリー']
+  },
+  en: {
+    Manfrotto: ['Tripod','Head','Monopod','Camera Bag','Lighting','Accessories'],
+    Gitzo:     ['Tripod (Gitzo)','Monopod (Gitzo)','Head (Gitzo)','Bag & Accessories'],
+    Lowepro:   ['Camera Bag'],
+    all:       ['Tripod','Head','Monopod','Camera Bag','Lighting','Accessories']
+  }
+};
+
+// ── サジェスト（カテゴリ別） ──
+const SUGGESTIONS = {
+  ja: {
+    'フォト三脚':      ['軽量な旅行用三脚が欲しい','カーボン製でおすすめは？','ミラーレス向け三脚を探している'],
+    'ビデオ三脚':      ['動画撮影に最適な三脚は？','YoutubeやVlog用に使いたい','600mm超望遠レンズ対応は？'],
+    'フォト雲台':      ['ボールヘッドのおすすめは？','軽量な雲台を探している','パノラマ撮影に向いた雲台は？'],
+    'ビデオ雲台':      ['フルード雲台を探している','ニトロテックシリーズは？','befree liveはどう？'],
+    '一脚':            ['スポーツ撮影に使いたい','超望遠レンズを支えたい','コンパクトな一脚は？'],
+    'カメラバッグ':    ['旅行用バックパックを探している','機材をたくさん入れたい','防水性の高いバッグは？'],
+    'ライティング':    ['撮影スタンドを探している','ストロボ用アクセサリーは？','Avengerブランドのスタンドは？'],
+    'アクセサリー':    ['マジックアームを探している','スマートフォンホルダーは？','テザー撮影用グッズは？'],
+    '三脚':            ['カーボン製でおすすめは？','旅行用コンパクト三脚は？','超望遠レンズ対応は？'],
+    '一脚':            ['最も軽量な一脚は？','大型レンズを使いたい'],
+    '雲台':            ['センターボール雲台は？','野鳥撮影に向いた雲台は？'],
+    'バッグ・アクセサリー': ['Gitzo専用バッグは？','三脚バッグを探している'],
+    'バックパック':    ['プロタクティックシリーズは？','防水性のあるバックパックは？','大型一眼+レンズ複数入る？'],
+    'ショルダーバッグ': ['小型ミラーレス向けは？','アドベンチュラシリーズは？'],
+    'TLZ・トップローディング': ['素早い取り出しができるバッグは？','望遠レンズをそのまま入れられる？'],
+    'レンズ・ハードケース': ['レンズを単体で収納したい','衝撃に強いケースは？'],
+    'ギアアップ・アクセサリー': ['ポーチやケースを探している','クリエーターボックスは？']
+  },
+  en: {
+    'Photo Tripod':   ["Looking for a lightweight travel tripod","Carbon fiber recommendations?","Best tripod for mirrorless?"],
+    'Video Tripod':   ["Best tripod for video shooting?","For YouTube / Vlog use","Support 600mm telephoto lens?"],
+    'Backpack':       ["Looking for a travel backpack","Need to carry lots of gear","Waterproof options?"],
+    'Shoulder Bag':   ["For small mirrorless camera","Adventura series?"],
+    'Tripod':         ["Carbon fiber recommendations?","Compact travel tripod?"],
+    'Monopod':        ["Lightest monopod available?","For large telephoto lens"],
+    'Head':           ["Center ball head recommendations?","For bird photography"],
+  }
+};
 
 const i18n = {
   ja: {
-    welcomeTitle: 'Find Your\nPerfect Gear',
-    welcomeSub: '気になる製品カテゴリーや用途を教えてください。\n最適なManfrotto製品をご提案します。',
+    welcomeTitle: 'Find Your Perfect Gear',
+    welcomeSub: '使用するブランドを選択してください',
+    allBrands: 'すべてのブランドから探す',
+    selectCategory: 'カテゴリーを選択',
     placeholder: 'メッセージを入力...',
-    userAvatar: 'あ',
-    introText: (n) => `ご条件に合う製品を${n}点ご提案します。各製品をタップすると購入リンクが表示されます。`,
     errorText: 'エラーが発生しました。もう一度お試しください。',
     listening: '🎤 話しかけてください...',
-    noSpeech: 'このブラウザは音声入力に対応していません。Chrome または Edge をご利用ください。',
+    noSpeech: 'このブラウザは音声入力に対応していません。',
     bic: 'ビックカメラ',
     yodo: 'ヨドバシカメラ',
     amazon: 'Amazon Japan',
-    chips: [
-      '三脚を探したい',
-      'カメラバッグを探したい',
-      '雲台を探したい',
-      '一脚を探したい',
-      '照明スタンドを探したい'
-    ]
+    introText: (n) => `ご条件に合う製品を${n}点ご提案します。`,
+    back: 'ブランド選択に戻る',
+    skipCategory: 'カテゴリーを選ばずに質問する',
   },
   en: {
-    welcomeTitle: 'Find Your\nPerfect Gear',
-    welcomeSub: "Tell me what you're looking for and I'll help you find the perfect Manfrotto product.",
+    welcomeTitle: 'Find Your Perfect Gear',
+    welcomeSub: 'Select a brand to get started',
+    allBrands: 'Search all brands',
+    selectCategory: 'Select a category',
     placeholder: 'Type your message...',
-    userAvatar: 'U',
-    introText: (n) => `Here are ${n} products that match your needs. Tap each to see purchase links.`,
     errorText: 'An error occurred. Please try again.',
     listening: '🎤 Listening...',
-    noSpeech: 'Voice input is not supported in this browser. Please use Chrome or Edge.',
+    noSpeech: 'Voice input not supported in this browser.',
     bic: 'Bic Camera',
     yodo: 'Yodobashi Camera',
     amazon: 'Amazon Japan',
-    chips: [
-      "I'm looking for a tripod",
-      "I need a camera bag",
-      "I'm looking for a ball head",
-      "I need a monopod",
-      "I'm looking for a lighting stand"
-    ]
+    introText: (n) => `Here are ${n} products matching your needs.`,
+    back: 'Back to brand selection',
+    skipCategory: 'Skip category selection',
   }
 };
 
@@ -375,112 +535,224 @@ function setLang(l) {
   lang = l;
   document.querySelectorAll('.lang-btn').forEach(b => b.classList.remove('active'));
   document.querySelector(`.lang-btn[onclick="setLang('${l}')"]`).classList.add('active');
-  const t = i18n[l];
-  const wt = document.getElementById('welcome-title');
-  const ws = document.getElementById('welcome-sub');
-  if (wt) wt.innerHTML = t.welcomeTitle.replace('\n', '<br>');
-  if (ws) ws.innerHTML = t.welcomeSub.replace('\n', '<br>');
-  document.getElementById('input-field').placeholder = t.placeholder;
+  document.getElementById('input-field').placeholder = i18n[l].placeholder;
+  renderWelcome();
+}
 
-  // Update quick reply chips
-  const chipsWrap = document.querySelector('.welcome-chips');
-  if (chipsWrap) {
-    chipsWrap.innerHTML = t.chips.map(c =>
-      `<span class="welcome-chip" onclick="sendQuick(this.textContent)">${c}</span>`
-    ).join('');
+function renderWelcome() {
+  const t = i18n[lang];
+  const w = document.getElementById('welcome');
+  if (!w) return;
+  w.innerHTML = `
+    <img class="welcome-vitec-logo" src="${LOGOS.vitec}" alt="Vitec">
+    <div class="welcome-title">${t.welcomeTitle}</div>
+    <p class="welcome-sub">${t.welcomeSub}</p>
+    <div class="brand-grid">
+      <div class="brand-card" onclick="selectBrand('Manfrotto')">
+        <img class="brand-logo manfrotto" src="${LOGOS.manfrotto}" alt="Manfrotto">
+      </div>
+      <div class="brand-card" onclick="selectBrand('Lowepro')">
+        <img class="brand-logo lowepro" src="${LOGOS.lowepro}" alt="Lowepro">
+      </div>
+      <div class="brand-card" onclick="selectBrand('Gitzo')">
+        <img class="brand-logo gitzo" src="${LOGOS.gitzo}" alt="Gitzo">
+      </div>
+      <div class="brand-card" onclick="selectBrand('all')">
+        <span class="all-brands-text">${t.allBrands}</span>
+      </div>
+    </div>`;
+}
+
+function selectBrand(brand) {
+  selectedBrand = brand;
+  const t = i18n[lang];
+  const w = document.getElementById('welcome');
+  if (!w) return;
+
+  // 「全ブランド」もカテゴリ選択を表示
+  if (brand === 'all') {
+    showCategoryScreen(null);
+    return;
   }
+
+  // Loweproはカメラバッグブランドなのでバッグ種類選択へ直接進む
+  if (brand === 'Lowepro') {
+    selectCategory('カメラバッグ');
+    return;
+  }
+  showCategoryScreen(brand);
+}
+
+function showCategoryScreen(brand) {
+  const t = i18n[lang];
+  const w = document.getElementById('welcome');
+  if (!w) return;
+
+  const cats = brand ? (CATEGORIES[lang][brand] || []) : CATEGORIES[lang]['all'];
+  const logoSrc = brand ? LOGOS[brand.toLowerCase()] : LOGOS.vitec;
+  const logoClass = brand ? brand.toLowerCase() : '';
+
+  const chips = cats.map(c =>
+    `<button class="category-chip" onclick="selectCategory('${c}')">${c}</button>`
+  ).join('');
+
+  w.innerHTML = `
+    <div class="category-header">
+      <img class="selected-brand-logo ${logoClass}" src="${logoSrc}" alt="${brand || 'Vitec'}" style="height:28px;width:auto;object-fit:contain;">
+      <span class="category-label">${t.selectCategory}</span>
+    </div>
+    <div class="category-grid">${chips}</div>
+    <button class="category-chip" style="margin-bottom:8px;border-style:dashed;color:var(--gray-500)"
+      onclick="startChat(${brand ? "'"+brand+"'" : 'null'}, null)">${t.skipCategory}</button>
+    <button class="back-link" onclick="renderWelcome()">${t.back}</button>`;
+}
+
+function selectCategory(cat) {
+  // カメラバッグを選んだ場合はさらに細分化
+  if (cat === 'カメラバッグ' || cat === 'Camera Bag') {
+    const t = i18n[lang];
+    const w = document.getElementById('welcome');
+    if (!w) return;
+
+    const bagCats = lang === 'ja'
+      ? ['バックパック','ショルダーバッグ','TLZ・トップローディング','レンズ・ハードケース','ギアアップ・アクセサリー']
+      : ['Backpack','Shoulder Bag','TLZ / Top Loading','Lens & Hard Case','GearUp & Accessories'];
+
+    const chips = bagCats.map(c =>
+      `<button class="category-chip" onclick="selectBagCategory('${c}')">${c}</button>`
+    ).join('');
+
+    const logoSrc = selectedBrand ? LOGOS[selectedBrand.toLowerCase()] : LOGOS.vitec;
+
+    w.innerHTML = `
+      <div class="category-header">
+        <img class="selected-brand-logo" src="${logoSrc}" alt="${selectedBrand || 'Vitec'}" style="height:28px;width:auto;object-fit:contain;">
+        <span class="category-label">${lang === 'ja' ? 'バッグの種類を選択' : 'Select bag type'}</span>
+      </div>
+      <div class="category-grid">${chips}</div>
+      <button class="category-chip" style="margin-bottom:8px;border-style:dashed;color:var(--gray-500)"
+        onclick="startChat(${selectedBrand ? "'"+selectedBrand+"'" : 'null'}, 'カメラバッグ')">${t.skipCategory}</button>
+      <button class="back-link" onclick="${selectedBrand === 'Lowepro' ? 'renderWelcome()' : 'showCategoryScreen(' + (selectedBrand ? "\'" + selectedBrand + "\'" : 'null') + ')'}">${lang === 'ja' ? (selectedBrand === 'Lowepro' ? 'ブランド選択に戻る' : 'カテゴリ選択に戻る') : (selectedBrand === 'Lowepro' ? 'Back to brand selection' : 'Back to categories')}</button>`;
+    return;
+  }
+
+  selectedCategory = cat;
+  startChat(selectedBrand, cat);
+}
+
+function selectBagCategory(cat) {
+  selectedCategory = cat;
+  startChat(selectedBrand, cat);
+}
+
+function startChat(brand, category) {
+  selectedBrand = brand;
+  selectedCategory = category;
+  currentStep = 0;
+  const w = document.getElementById('welcome');
+  if (w) w.remove();
+  document.getElementById('reset-btn').classList.add('visible');
+
+  // カテゴリ別の最初の質問と選択肢
+  const firstQ = {
+    ja: {
+      '三脚':                    { msg: `${brand || ''}の三脚をお探しですね！まず、主な用途を教えてください。`, opts: ['写真撮影メイン','動画撮影メイン','写真・動画両方'] },
+      '雲台':                    { msg: `${brand || ''}の雲台をお探しですね！まず、主な用途を教えてください。`, opts: ['写真撮影メイン','動画撮影メイン','写真・動画両方'] },
+      '一脚':                    { msg: `${brand || ''}の一脚をお探しですね！主な用途を教えてください。`, opts: ['スポーツ・報道','動画・Vlog','登山・旅行','野鳥・超望遠'] },
+      'カメラバッグ':            { msg: `${brand || ''}のカメラバッグをお探しですね！どのような機材を収納したいですか？`, opts: ['ミラーレス+レンズ2〜3本','一眼+レンズ3〜4本','大型機材複数'] },
+      'バックパック':            { msg: `Loweproのバックパックをお探しですね！どのような機材を収納したいですか？`, opts: ['ミラーレス+レンズ2〜3本','一眼+レンズ3〜4本','大型機材複数'] },
+      'ショルダーバッグ':        { msg: `Loweproのショルダーバッグをお探しですね！収納したい機材を教えてください。`, opts: ['コンパクト1台のみ','カメラ1台+レンズ1本','カメラ+レンズ複数'] },
+      'TLZ・トップローディング': { msg: `Loweproのトップローディングバッグをお探しですね！収納したいレンズサイズを教えてください。`, opts: ['〜24-70mm','〜70-200mm','300mm以上'] },
+      'レンズ・ハードケース':    { msg: `Loweproのケースをお探しですね！何を収納したいですか？`, opts: ['交換レンズ','カメラ+アクセサリー','バッテリー・小物'] },
+      'ギアアップ・アクセサリー':{ msg: `Loweproのギアアップアクセサリーをお探しですね！何を収納したいですか？`, opts: ['ケーブル・バッテリー','カメラ本体','レンズ','メモリーカード'] },
+      'ライティング':            { msg: `${brand || ''}のライティング機材をお探しですね！主な用途を教えてください。`, opts: ['ポートレート','動画・YouTube','商品撮影','屋外ロケ'] },
+      'アクセサリー':            { msg: `${brand || ''}のアクセサリーをお探しですね！何に使いたいですか？`, opts: ['カメラ固定・支持','テザー撮影','ライティング補助','その他'] },
+      '三脚（Gitzo）':           { msg: 'Gitzoの三脚をお探しですね！どのような撮影シーンで使いますか？', opts: ['旅行・登山','風景・長時間露光','野鳥・超望遠','動画・映像制作'] },
+      '一脚（Gitzo）':           { msg: 'Gitzoの一脚をお探しですね！主な用途を教えてください。', opts: ['スポーツ・野鳥','風景・旅行','動画・Vlog'] },
+      '雲台（Gitzo）':           { msg: 'Gitzoの雲台をお探しですね！主な用途を教えてください。', opts: ['写真撮影','動画撮影','パノラマ・360°'] },
+      'バッグ・アクセサリー（Gitzo）': { msg: 'Gitzoのバッグ・アクセサリーをお探しですね！何を収納したいですか？', opts: ['三脚バッグ','カメラバッグ','アクセサリー'] },
+    },
+    en: {
+      '三脚':       { msg: `Looking for a ${brand || ''} tripod! What's the main purpose?`, opts: ['Photography','Video','Both photo & video'] },
+      '雲台':       { msg: `Looking for a ${brand || ''} head! What's the main purpose?`, opts: ['Photography','Video','Both'] },
+      'バックパック':{ msg: `Looking for a Lowepro backpack! What gear do you need to carry?`, opts: ['Mirrorless+2-3 lenses','DSLR+3-4 lenses','Large gear'] },
+    }
+  };
+
+  const catKey = category || '';
+  const q = firstQ[lang]?.[catKey];
+
+  let intro, opts;
+  if (q) {
+    intro = q.msg;
+    opts = q.opts;
+  } else if (lang === 'ja') {
+    intro = brand ? `${brand}製品をお探しですね！どのような製品をお探しですか？` : `全ブランドから探しますね。どのような製品をお探しですか？`;
+    opts = SUGGESTIONS[lang]?.[category] || [];
+  } else {
+    intro = brand ? `Looking for ${brand} products! What are you looking for?` : `Searching all brands! What are you looking for?`;
+    opts = [];
+  }
+
+  appendMsg('bot', intro);
+  history.push({ role: 'assistant', content: intro });
+  setTimeout(() => showOptions(opts), 150);
 }
 
 function autoResize(el) {
   el.style.height = 'auto';
   el.style.height = Math.min(el.scrollHeight, 120) + 'px';
 }
-
-function handleKey(e) {
-  if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMessage(); }
-}
-
-function sendQuick(text) {
-  document.getElementById('input-field').value = text;
-  sendMessage();
-}
+function handleKey(e) { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMessage(); } }
 
 function showOptions(options) {
   const bar = document.getElementById('options-bar');
   const inner = document.getElementById('options-inner');
+  // まず必ずクリア・非表示
   inner.innerHTML = '';
-  if (!options || options.length === 0) {
-    bar.classList.remove('visible');
-    return;
-  }
+  bar.classList.remove('visible');
+  if (!options || options.length === 0) return;
   options.forEach(opt => {
     const chip = document.createElement('button');
     chip.className = 'option-chip';
     chip.textContent = opt;
-    chip.onclick = () => {
-      showOptions([]); // Clear options when one is selected
-      document.getElementById('input-field').value = opt;
-      sendMessage();
-    };
+    chip.onclick = () => { showOptions([]); document.getElementById('input-field').value = opt; sendMessage(); };
     inner.appendChild(chip);
   });
   bar.classList.add('visible');
 }
 
 function resetChat() {
-  history = [];
-  isLoading = false;
+  history = []; isLoading = false; selectedBrand = null; selectedCategory = null; currentStep = 0;
   document.getElementById('send-btn').disabled = false;
   document.getElementById('reset-btn').classList.remove('visible');
   showOptions([]);
   const chat = document.getElementById('chat');
-  chat.innerHTML = `
-    <div class="welcome" id="welcome">
-      <div class="welcome-title" id="welcome-title"></div>
-      <div class="welcome-sub" id="welcome-sub"></div>
-      <div class="welcome-chips" id="welcome-chips"></div>
-    </div>`;
-  setLang(lang);
-}
-
-function hideWelcome() {
-  const w = document.getElementById('welcome');
-  if (w) {
-    w.remove();
-    document.getElementById('reset-btn').classList.add('visible');
-  }
+  chat.innerHTML = '<div class="welcome" id="welcome"></div>';
+  renderWelcome();
 }
 
 function appendMsg(role, content) {
-  hideWelcome();
   const chat = document.getElementById('chat');
   const t = i18n[lang];
-
   const div = document.createElement('div');
   div.className = `msg ${role}`;
-
   const avatar = document.createElement('div');
   avatar.className = 'msg-avatar';
   if (role === 'bot') {
-    // Robot / AI icon
     avatar.innerHTML = `<svg viewBox="0 0 24 24"><rect x="3" y="8" width="18" height="13" rx="2"></rect><path d="M12 8V5"></path><circle cx="12" cy="4" r="1"></circle><circle cx="8.5" cy="13" r="1.5" fill="white" stroke="none"></circle><circle cx="15.5" cy="13" r="1.5" fill="white" stroke="none"></circle><path d="M8 17h8"></path></svg>`;
   } else {
-    // User icon
     avatar.innerHTML = `<svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>`;
   }
-
   const bubble = document.createElement('div');
   bubble.className = 'msg-bubble';
-
   if (role === 'bot' && typeof content === 'object' && content.type === 'products') {
     const intro = document.createElement('div');
     intro.className = 'product-intro';
     intro.textContent = t.introText(content.items.length);
     bubble.appendChild(intro);
-
     const wrap = document.createElement('div');
     wrap.className = 'products-wrap';
-
     content.items.forEach((p, i) => {
       const sku = (p.sku || '').toString().trim();
       const card = document.createElement('div');
@@ -488,7 +760,7 @@ function appendMsg(role, content) {
       card.innerHTML = `
         <div class="product-card-header" onclick="toggleCard(this.parentElement)">
           <div class="product-card-info">
-            <div class="product-card-num">0${i + 1}</div>
+            <div class="product-card-num">0${i+1}</div>
             <div class="product-card-name">${p.name}</div>
             <div class="product-card-sku">${sku}</div>
             ${p.price && !isNaN(Number(p.price)) ? `<div class="product-card-price">¥${Math.floor(Number(p.price)).toLocaleString()}</div>` : ''}
@@ -518,7 +790,6 @@ function appendMsg(role, content) {
   } else {
     bubble.innerHTML = (typeof content === 'string' ? content : '').replace(/\n/g, '<br>');
   }
-
   div.appendChild(avatar);
   div.appendChild(bubble);
   chat.appendChild(div);
@@ -528,81 +799,122 @@ function appendMsg(role, content) {
 function toggleCard(card) { card.classList.toggle('open'); }
 
 function showTyping() {
-  hideWelcome();
   const chat = document.getElementById('chat');
   const div = document.createElement('div');
-  div.className = 'msg bot';
-  div.id = 'typing-msg';
+  div.className = 'msg bot'; div.id = 'typing-msg';
   const avatar = document.createElement('div');
-  avatar.className = 'msg-avatar';
-  avatar.style.background = '#0a0a0a';
+  avatar.className = 'msg-avatar'; avatar.style.background = '#0a0a0a';
   avatar.innerHTML = `<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="8" width="18" height="13" rx="2"></rect><path d="M12 8V5"></path><circle cx="12" cy="4" r="1"></circle><circle cx="8.5" cy="13" r="1.5" fill="white" stroke="none"></circle><circle cx="15.5" cy="13" r="1.5" fill="white" stroke="none"></circle><path d="M8 17h8"></path></svg>`;
-  const indicator = document.createElement('div');
-  indicator.className = 'typing-indicator';
-  indicator.innerHTML = '<div class="typing-dot"></div><div class="typing-dot"></div><div class="typing-dot"></div>';
-  div.appendChild(avatar);
-  div.appendChild(indicator);
-  chat.appendChild(div);
-  chat.scrollTop = chat.scrollHeight;
+  const ind = document.createElement('div');
+  ind.className = 'typing-indicator';
+  ind.innerHTML = '<div class="typing-dot"></div><div class="typing-dot"></div><div class="typing-dot"></div>';
+  div.appendChild(avatar); div.appendChild(ind);
+  chat.appendChild(div); chat.scrollTop = chat.scrollHeight;
 }
-
-function removeTyping() {
-  const el = document.getElementById('typing-msg');
-  if (el) el.remove();
-}
+function removeTyping() { const el = document.getElementById('typing-msg'); if (el) el.remove(); }
 
 async function sendMessage() {
   if (isLoading) return;
+  // チャット開始前にブランドを選択させる
+  if (!selectedBrand && !document.getElementById('welcome') === false) return;
+
   const field = document.getElementById('input-field');
   const text = field.value.trim();
   if (!text) return;
-
-  field.value = '';
-  field.style.height = 'auto';
+  field.value = ''; field.style.height = 'auto';
   isLoading = true;
   document.getElementById('send-btn').disabled = true;
-
   appendMsg('user', text);
   history.push({ role: 'user', content: text });
+  showOptions([]);
   showTyping();
 
   try {
     const res = await fetch('/api/chat', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ messages: history, lang: lang })
+      body: JSON.stringify({
+        messages: history,
+        lang,
+        brand: selectedBrand !== 'all' ? selectedBrand : null,
+        category: selectedCategory
+      })
     });
-
     const data = await res.json();
     removeTyping();
     if (!res.ok) throw new Error(data.error || 'Error');
-
     const reply = data.reply;
+    // 返答受信時に再度クリア（念のため）
+    showOptions([]);
 
-    // Product recommendation
     if (reply && reply.type === 'products') {
       history.push({ role: 'assistant', content: JSON.stringify(reply) });
       appendMsg('bot', reply);
       showOptions([]);
-    }
-    // Normal message with options
-    else if (reply && reply.message) {
+    } else if (reply && reply.message) {
       history.push({ role: 'assistant', content: reply.message });
       appendMsg('bot', reply.message);
-      showOptions(reply.options || []);
+      currentStep++;
+
+      const flowOpts = FLOW_OPTIONS[lang]?.[selectedCategory];
+      const totalSteps = flowOpts ? flowOpts.length : 0;
+
+      if (currentStep >= totalSteps) {
+        // 全ステップ完了 → 推薦フェーズへ（自動でもう一度送信）
+        showOptions([]);
+        const finalMsg = lang === 'ja'
+          ? 'おすすめの製品を探しています...'
+          : 'Finding the best products for you...';
+        appendMsg('bot', finalMsg);
+        history.push({ role: 'assistant', content: finalMsg });
+        // 少し待ってから推薦リクエスト送信
+        setTimeout(async () => {
+          isLoading = true;
+          document.getElementById('send-btn').disabled = true;
+          showTyping();
+          try {
+            const res = await fetch('/api/chat', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                messages: history,
+                lang,
+                brand: selectedBrand !== 'all' ? selectedBrand : null,
+                category: selectedCategory,
+                forceRecommend: true
+              })
+            });
+            const data = await res.json();
+            removeTyping();
+            const r = data.reply;
+            if (r && r.type === 'products') {
+              history.push({ role: 'assistant', content: JSON.stringify(r) });
+              appendMsg('bot', r);
+            } else if (r && r.message) {
+              history.push({ role: 'assistant', content: r.message });
+              appendMsg('bot', r.message);
+            }
+          } catch(e) {
+            removeTyping();
+            appendMsg('bot', lang === 'ja' ? 'エラーが発生しました。' : 'An error occurred.');
+          }
+          isLoading = false;
+          document.getElementById('send-btn').disabled = false;
+        }, 800);
+      } else {
+        // 次のステップの選択肢を表示
+        const nextOpts = flowOpts[currentStep];
+        setTimeout(() => showOptions(nextOpts), 150);
+      }
+    } else {
+      const txt = typeof reply === 'string' ? reply : '';
+      history.push({ role: 'assistant', content: txt });
+      appendMsg('bot', txt);
     }
-    // Fallback
-    else {
-      const text = typeof reply === 'string' ? reply : '';
-      history.push({ role: 'assistant', content: text });
-      appendMsg('bot', text);
-      showOptions([]);
-    }
-  } catch (e) {
+  } catch(e) {
     removeTyping();
     appendMsg('bot', i18n[lang].errorText);
   }
-
   isLoading = false;
   document.getElementById('send-btn').disabled = false;
   document.getElementById('input-field').focus();
@@ -613,13 +925,10 @@ function toggleVoice() {
     alert(i18n[lang].noSpeech); return;
   }
   if (isRecording) { recognition.stop(); return; }
-
   const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
   recognition = new SR();
   recognition.lang = lang === 'ja' ? 'ja-JP' : 'en-US';
-  recognition.interimResults = true;
-  recognition.continuous = false;
-
+  recognition.interimResults = true; recognition.continuous = false;
   recognition.onstart = () => {
     isRecording = true;
     document.getElementById('mic-btn').classList.add('recording');
@@ -645,7 +954,7 @@ function toggleVoice() {
   recognition.start();
 }
 
-// Initialize chips on load
+// 初期表示
 setLang('ja');
 </script>
 </body>
