@@ -2,9 +2,10 @@ import fs from 'fs';
 import path from 'path';
 
 // ============================================================
-// カテゴリ→データファイルマッピング（Manfrottoのみローカルデータあり）
+// カテゴリ→データファイルマッピング
 // ============================================================
 const CATEGORY_TO_FILE = {
+  // Manfrotto 日本語
   '三脚':                     'tripods',
   '雲台':                     'heads',
   '一脚':                     'monopods',
@@ -16,18 +17,27 @@ const CATEGORY_TO_FILE = {
   'ギアアップ・アクセサリー': 'bags',
   'ライティング':             'lighting',
   'アクセサリー':             'lighting',
-  // Gitzo
+  // Gitzo 日本語
   '三脚（Gitzo）':            'tripods',
   '一脚（Gitzo）':            'monopods',
   '雲台（Gitzo）':            'heads',
   'バッグ・アクセサリー（Gitzo）': 'bags',
-  // English
-  'Tripod':    'tripods',
-  'Head':      'heads',
-  'Monopod':   'monopods',
-  'Camera Bag':'bags',
-  'Backpack':  'bags',
-  'Lighting':  'lighting',
+  // 英語カテゴリ
+  'Tripod':              'tripods',
+  'Head':                'heads',
+  'Monopod':             'monopods',
+  'Camera Bag':          'bags',
+  'Backpack':            'bags',
+  'Shoulder Bag':        'bags',
+  'TLZ / Top Loading':   'bags',
+  'Lens & Hard Case':    'bags',
+  'GearUp & Accessories':'bags',
+  'Lighting':            'lighting',
+  'Accessories':         'lighting',
+  'Tripod (Gitzo)':      'tripods',
+  'Monopod (Gitzo)':     'monopods',
+  'Head (Gitzo)':        'heads',
+  'Bag & Accessories':   'bags',
 };
 
 function loadMini(filename) {
@@ -46,121 +56,183 @@ function getProductList(category) {
 }
 
 // ============================================================
-// ブランド別 質問フロー（システムプロンプト用）
+// 質問フロー定義（V2と完全統一・条件分岐なし）
 // ============================================================
 const FLOWS = {
   ja: {
-    // Manfrotto
-    '三脚': `【三脚の質問フロー】この順番で1つずつ質問：
-1. 用途を確認 → options:["写真撮影メイン","動画撮影メイン","写真・動画両方"]
-2. 機材重量を確認 → options:["〜2kg","2〜5kg","5〜10kg","10kg以上"]
-3. 撮影シーンを確認 → options:["旅行・登山","街撮り・日常","スタジオ・室内","スポーツ・野鳥"]
-4. 素材を確認 → options:["カーボン（軽量優先）","アルミ（コスパ優先）","こだわらない"]
-5. 予算を確認 → options:["〜3万円","3〜8万円","8〜15万円","15万円以上"]`,
+    '三脚': `【三脚の質問フロー】1つずつ質問：
+1. 主な用途 → options:["写真撮影メイン","動画撮影メイン","写真・動画両方"]
+2. 使用機材の重さ → options:["〜2kg","2〜5kg","5〜10kg","10kg以上"]
+3. 撮影シーン → options:["旅行・登山","街撮り・日常","スタジオ・室内","スポーツ・野鳥","放送・シネマ"]
+4. 素材のこだわり → options:["カーボン（軽量優先）","アルミ（コスパ優先）","こだわらない"]
+5. 予算感 → options:["〜3万円","3〜8万円","8〜15万円","15万円以上"]`,
 
-    '雲台': `【雲台の質問フロー】この順番で1つずつ質問：
-1. 用途を確認 → options:["写真撮影メイン","動画撮影メイン","写真・動画両方"]
-2. 機材重量を確認 → options:["〜2kg","2〜5kg","5〜10kg","10kg以上"]
-3. 三脚との組み合わせを確認 → options:["Manfrotto三脚と合わせたい","他社三脚を持っている","三脚もこれから購入"]
-4. 予算を確認 → options:["〜2万円","2〜5万円","5〜10万円","10万円以上"]`,
+    '雲台': `【雲台の質問フロー】1つずつ質問：
+1. 主な用途 → options:["写真撮影メイン","動画撮影メイン","写真・動画両方"]
+2. 雲台のタイプ → options:["ボールヘッド","3ウェイ","ビデオ雲台（フルード）","ギア雲台","わからない"]
+3. 使用機材の重さ → options:["〜2kg","2〜5kg","5〜10kg","10kg以上"]
+4. 三脚との組み合わせ → options:["Manfrotto三脚と合わせたい","他社三脚を持っている","三脚もこれから購入"]
+5. 予算感 → options:["〜2万円","2〜5万円","5〜10万円","10万円以上"]`,
 
-    '一脚': `【一脚の質問フロー】この順番で1つずつ質問：
-1. 用途を確認 → options:["スポーツ・報道","動画・Vlog","登山・旅行","野鳥・超望遠"]
-2. 機材重量を確認 → options:["〜1.5kg","〜2.5kg","〜5kg","5kg以上"]
-3. 雲台の必要性を確認 → options:["一脚のみでよい","雲台セットが欲しい","既に雲台を持っている"]
-4. 素材を確認 → options:["カーボン（軽量優先）","アルミ（コスパ優先）","こだわらない"]`,
+    '一脚': `【一脚の質問フロー】1つずつ質問：
+1. 主な用途 → options:["スポーツ・報道","動画・Vlog","登山・旅行","野鳥・超望遠"]
+2. 機材の重さ → options:["〜1.5kg","〜2.5kg","〜5kg","5kg以上"]
+3. 雲台は必要か → options:["一脚のみでよい","雲台セットが欲しい","既に雲台を持っている"]
+4. 素材 → options:["カーボン（軽量優先）","アルミ（コスパ優先）","こだわらない"]`,
 
-    'カメラバッグ': `【カメラバッグの質問フロー】この順番で1つずつ質問：
-1. 収納機材を確認 → options:["ミラーレス+レンズ2〜3本","一眼+レンズ3〜4本","大型機材複数"]
-2. 最大レンズサイズを確認 → options:["標準ズーム程度","70-200mm","超望遠300mm以上"]
-3. PC収納を確認 → options:["13インチ以下","15インチ","不要"]
-4. 使用シーンを確認 → options:["旅行・登山","街撮り・日常","プロ撮影","ドローン運搬"]`,
+    'カメラバッグ': `【カメラバッグの質問フロー】1つずつ質問：
+1. バッグのスタイル → options:["バックパック","ショルダーバッグ","トップローディング","どれでもよい"]
+2. 収納したい機材 → options:["ミラーレス+レンズ2〜3本","一眼+レンズ3〜4本","大型機材複数"]
+3. 最大レンズサイズ → options:["標準ズーム程度","70-200mm","超望遠300mm以上"]
+4. PC・タブレット収納 → options:["13インチ以下","15インチ","不要"]
+5. 使用シーン → options:["旅行・登山","街撮り・日常","プロ撮影","ドローン運搬"]`,
 
-    'バックパック': `【バックパックの質問フロー】この順番で1つずつ質問：
-1. 収納機材を確認 → options:["ミラーレス+レンズ2〜3本","一眼+レンズ3〜4本","大型機材複数"]
-2. 最大レンズサイズを確認 → options:["標準ズーム程度","70-200mm","超望遠・シネレンズ"]
-3. PC収納を確認 → options:["13インチ以下","15インチ","不要"]
-4. 使用シーンを確認 → options:["旅行・登山","街撮り・日常","プロ撮影","ドローン運搬"]`,
+    'バックパック': `【バックパックの質問フロー】1つずつ質問：
+1. 収納したい機材 → options:["ミラーレス+レンズ2〜3本","一眼+レンズ3〜4本","大型機材複数"]
+2. 最大レンズサイズ → options:["標準ズーム程度","70-200mm","超望遠・シネレンズ"]
+3. PC・タブレット収納 → options:["13インチ以下","15インチ","不要"]
+4. 使用シーン → options:["旅行・登山","街撮り・日常","プロ撮影","ドローン運搬"]
+5. 防水・レインカバー → options:["必須","あれば嬉しい","不要"]`,
 
-    'ショルダーバッグ': `【ショルダーバッグの質問フロー】この順番で1つずつ質問：
-1. 収納機材を確認 → options:["コンパクト1台のみ","カメラ1台+レンズ1本","カメラ+レンズ複数"]
-2. スタイルを確認 → options:["斜めがけショルダー","スリング","トップローディング"]
-3. 使用シーンを確認 → options:["日常・街撮り","旅行","スポーツ・アウトドア"]`,
+    'ショルダーバッグ': `【ショルダーバッグの質問フロー】1つずつ質問：
+1. 収納したい機材 → options:["コンパクト1台のみ","カメラ1台+レンズ1本","カメラ+レンズ複数"]
+2. バッグのスタイル → options:["斜めがけショルダー","スリング","トップローディング"]
+3. 使用シーン → options:["日常・街撮り","旅行","スポーツ・アウトドア"]`,
 
-    'TLZ・トップローディング': `【TLZ・トップローディングの質問フロー】この順番で1つずつ質問：
-1. レンズサイズを確認 → options:["〜24-70mm","〜70-200mm","300mm以上"]
-2. 用途を確認 → options:["素早く取り出したい","しっかり保護したい","両方"]
-3. 使い方を確認 → options:["単独で使う","他のバッグのインサートとして"]`,
+    'TLZ・トップローディング': `【TLZ・トップローディングの質問フロー】1つずつ質問：
+1. 収納したいレンズサイズ → options:["〜24-70mm","〜70-200mm","300mm以上"]
+2. 重視すること → options:["素早く取り出したい","しっかり保護したい","両方"]
+3. 使い方 → options:["単独で使う","他のバッグのインサートとして"]`,
 
-    'レンズ・ハードケース': `【レンズ・ハードケースの質問フロー】この順番で1つずつ質問：
-1. 収納物を確認 → options:["交換レンズ","カメラ+アクセサリー","バッテリー・小物"]
-2. サイズを確認 → options:["小型（〜8cm径）","中型（〜11cm径）","大型（〜13cm径）"]
-3. 使い方を確認 → options:["バッグのインサート","単独で携帯","スタジオ保管"]`,
+    'レンズ・ハードケース': `【レンズ・ハードケースの質問フロー】1つずつ質問：
+1. 収納したいもの → options:["交換レンズ","カメラ+アクセサリー","バッテリー・小物"]
+2. レンズサイズ → options:["小型（〜8cm径）","中型（〜11cm径）","大型（〜13cm径）"]
+3. 使い方 → options:["バッグのインサート","単独で携帯","スタジオ保管"]`,
 
-    'ギアアップ・アクセサリー': `【ギアアップアクセサリーの質問フロー】この順番で1つずつ質問：
-1. 収納物を確認 → options:["ケーブル・バッテリー","カメラ本体","レンズ","メモリーカード"]
-2. 使い方を確認 → options:["バッグのインサート","単独で使う","整理収納"]`,
+    'ギアアップ・アクセサリー': `【ギアアップアクセサリーの質問フロー】1つずつ質問：
+1. 収納したいもの → options:["ケーブル・バッテリー","カメラ本体","レンズ","メモリーカード"]
+2. 使い方 → options:["バッグのインサート","単独で使う","整理収納"]`,
 
-    'ライティング': `【ライティングの質問フロー】この順番で1つずつ質問：
-1. 用途を確認 → options:["ポートレート","動画・YouTube","商品撮影","屋外ロケ"]
-2. 光源の種類を確認 → options:["ストロボ","LED","リングライト","大型モノブロック"]
-3. スタンドの必要性を確認 → options:["スタンドも欲しい","既に持っている","アクセサリーのみ"]
-4. 設置場所を確認 → options:["スタジオ固定","自宅・小スペース","屋外","卓上"]`,
+    'ライティング': `【ライティングの質問フロー】1つずつ質問：
+1. 主な用途 → options:["ポートレート","動画・YouTube","商品・物撮り","屋外ロケ"]
+2. 光源の種類 → options:["ストロボ","LED","リングライト","大型モノブロック"]
+3. スタンドも必要か → options:["スタンドも欲しい","既に持っている","アクセサリーのみ"]
+4. 設置場所 → options:["スタジオ固定","自宅・小スペース","屋外移動","卓上"]
+5. アームも必要か → options:["必要","不要","わからない"]`,
 
-    'アクセサリー': `【アクセサリーの質問フロー】この順番で1つずつ質問：
-1. 用途を確認 → options:["カメラ固定・支持","テザー撮影","ライティング補助","その他"]
-2. 取り付け先を確認 → options:["三脚","ライトスタンド","カメラ本体","壁・天井"]
-3. 種類を確認 → options:["マジックアーム","クランプ","プレート","ストラップ"]`,
+    'アクセサリー': `【アクセサリーの質問フロー】1つずつ質問：
+1. 何に使いたいか → options:["カメラ固定・支持","テザー撮影","ライティング補助","その他"]
+2. 取り付け先 → options:["三脚","ライトスタンド","カメラ本体","壁・天井"]
+3. 具体的に欲しいもの → options:["マジックアーム","クランプ","プレート","ストラップ"]`,
 
-    // Gitzo
-    '三脚（Gitzo）': `【Gitzo三脚の質問フロー】この順番で1つずつ質問：
-1. 撮影シーンを確認 → options:["旅行・登山","風景・長時間露光","野鳥・超望遠","動画・映像制作"]
-2. 機材重量を確認 → options:["〜3kg","3〜6kg","6〜10kg","10kg以上"]
-3. 雲台の必要性を確認 → options:["三脚のみ","雲台もセットで欲しい","既に雲台を持っている"]
-4. 優先事項を確認 → options:["できるだけ軽く小さく","安定性重視","バランス重視"]`,
+    '三脚（Gitzo）': `【Gitzo三脚の質問フロー】1つずつ質問：
+1. 撮影シーン → options:["旅行・登山","風景・長時間露光","野鳥・超望遠","動画・映像制作"]
+2. カメラ＋レンズの合計重量 → options:["〜3kg","3〜6kg","6〜10kg","10kg以上"]
+3. 雲台も必要か → options:["三脚のみ","雲台もセットで欲しい","既に雲台を持っている"]
+4. 携帯性のこだわり → options:["できるだけ軽く小さく","安定性重視","バランス重視"]
+5. 予算感 → options:["〜5万円","5〜10万円","10〜20万円","20万円以上"]`,
 
-    '一脚（Gitzo）': `【Gitzo一脚の質問フロー】この順番で1つずつ質問：
-1. 用途を確認 → options:["スポーツ・野鳥","風景・旅行","動画・Vlog"]
-2. 機材重量を確認 → options:["〜3kg","3〜6kg","6kg以上"]
-3. 優先事項を確認 → options:["コンパクトに畳みたい","剛性重視","こだわらない"]`,
+    '一脚（Gitzo）': `【Gitzo一脚の質問フロー】1つずつ質問：
+1. 撮影シーン → options:["スポーツ・野鳥","風景・旅行","動画・Vlog"]
+2. 機材の重さ → options:["〜3kg","3〜6kg","6kg以上"]
+3. 段数のこだわり → options:["コンパクトに畳みたい","剛性重視","こだわらない"]`,
 
-    '雲台（Gitzo）': `【Gitzo雲台の質問フロー】この順番で1つずつ質問：
-1. 用途を確認 → options:["写真撮影","動画撮影","パノラマ・360°"]
-2. 機材重量を確認 → options:["〜5kg","5〜10kg","10〜25kg"]
-3. 組み合わせを確認 → options:["Gitzo三脚と合わせたい","他社三脚を持っている","三脚もこれから購入"]`,
+    '雲台（Gitzo）': `【Gitzo雲台の質問フロー】1つずつ質問：
+1. 主な用途 → options:["写真撮影","動画撮影","パノラマ・360°"]
+2. 機材の重さ → options:["〜5kg","5〜10kg","10〜25kg"]
+3. 三脚との組み合わせ → options:["Gitzo三脚と合わせたい","他社三脚を持っている","三脚もこれから購入"]`,
 
-    'バッグ・アクセサリー（Gitzo）': `【Gitzoバッグの質問フロー】この順番で1つずつ質問：
-1. 種類を確認 → options:["三脚バッグ","カメラバッグ","アクセサリー"]
-2. サイズを確認 → options:["コンパクト（トラベラー相当）","中型","大型"]`,
+    'バッグ・アクセサリー（Gitzo）': `【Gitzoバッグの質問フロー】1つずつ質問：
+1. 何を収納したいか → options:["三脚バッグ","カメラバッグ","アクセサリー"]
+2. 対応したい三脚サイズ → options:["コンパクト（トラベラー相当）","中型","大型"]`,
   },
 
   en: {
-    '三脚': `[Tripod Flow] Ask ONE question at a time:
-1. Main use → options:["Photography","Video","Both"]
-2. Equipment weight → options:["~2kg","2-5kg","5-10kg","10kg+"]
-3. Scene → options:["Travel/hiking","Street","Studio","Sports/wildlife"]
+    'Tripod': `[Tripod Flow] Ask ONE question at a time:
+1. Main purpose → options:["Photography","Video","Both photo & video"]
+2. Gear weight (camera + lens) → options:["Up to 2kg","2-5kg","5-10kg","10kg+"]
+3. Shooting scene → options:["Travel/hiking","Street/daily","Studio","Sports/wildlife","Cinema/broadcast"]
+4. Material → options:["Carbon (lightweight)","Aluminum (value)","No preference"]
+5. Budget → options:["Under ¥30,000","¥30,000-80,000","¥80,000-150,000","¥150,000+"]`,
+
+    'Head': `[Head Flow] Ask ONE question at a time:
+1. Main purpose → options:["Photography","Video","Both photo & video"]
+2. Head type → options:["Ball head","3-way","Fluid (video)","Geared","Not sure"]
+3. Gear weight → options:["Up to 2kg","2-5kg","5-10kg","10kg+"]
+4. Tripod combination → options:["With Manfrotto tripod","With other brand tripod","Need tripod too"]
+5. Budget → options:["Under ¥20,000","¥20,000-50,000","¥50,000-100,000","¥100,000+"]`,
+
+    'Monopod': `[Monopod Flow] Ask ONE question at a time:
+1. Main use → options:["Sports & news","Video & vlog","Hiking & travel","Wildlife & telephoto"]
+2. Gear weight → options:["Up to 1.5kg","Up to 2.5kg","Up to 5kg","5kg+"]
+3. Head needed? → options:["Monopod only","With head set","Already have a head"]
 4. Material → options:["Carbon (lightweight)","Aluminum (value)","No preference"]`,
 
-    '雲台': `[Head Flow] Ask ONE question at a time:
-1. Main use → options:["Photography","Video","Both"]
-2. Equipment weight → options:["~2kg","2-5kg","5-10kg","10kg+"]
-3. Tripod combo → options:["Manfrotto tripod","Other brand","Not yet purchased"]`,
+    'Camera Bag': `[Camera Bag Flow] Ask ONE question at a time:
+1. Bag style → options:["Backpack","Shoulder bag","Top loading","Any style"]
+2. Gear to carry → options:["Mirrorless + 2-3 lenses","DSLR + 3-4 lenses","Large gear multiple"]
+3. Largest lens → options:["Standard zoom","70-200mm","Super telephoto 300mm+"]
+4. Laptop/tablet → options:["Up to 13\\"","15\\"","Not needed"]
+5. Main scene → options:["Travel/hiking","Street/daily","Professional","Drone transport"]`,
 
-    '一脚': `[Monopod Flow] Ask ONE question at a time:
-1. Main use → options:["Sports & news","Video & vlog","Hiking & travel","Wildlife & tele"]
-2. Equipment weight → options:["~1.5kg","~2.5kg","~5kg","5kg+"]
-3. Head needed → options:["Monopod only","With head set","Already have one"]`,
-
-    'バックパック': `[Backpack Flow] Ask ONE question at a time:
-1. Gear to carry → options:["Mirrorless + 2-3 lenses","DSLR + 3-4 lenses","Large gear multiple"]
-2. Largest lens → options:["Standard zoom","70-200mm","Super telephoto"]
-3. Laptop → options:["13\" or smaller","15\"","Not needed"]
-4. Main scene → options:["Travel/hiking","Street/daily","Professional","Drone transport"]`,
-
-    'ライティング': `[Lighting Flow] Ask ONE question at a time:
-1. Main use → options:["Portrait","Video/YouTube","Product","Outdoor location"]
+    'Lighting': `[Lighting Flow] Ask ONE question at a time:
+1. Main purpose → options:["Portrait","Video/YouTube","Product photography","Outdoor location"]
 2. Light source → options:["Strobe","LED","Ring light","Large monoblock"]
-3. Stand needed → options:["Need stand too","Already have one","Accessories only"]`,
+3. Stand needed? → options:["Need stand too","Already have one","Accessories only"]
+4. Location → options:["Studio fixed","Home/small space","Outdoor mobile","Desktop"]
+5. Arm needed? → options:["Needed","Not needed","Not sure"]`,
+
+    'Accessories': `[Accessories Flow] Ask ONE question at a time:
+1. Main use → options:["Camera support","Tethered shooting","Lighting support","Other"]
+2. Mount point → options:["Tripod","Light stand","Camera body","Wall/ceiling"]
+3. Type needed → options:["Magic arm","Clamp","Plate","Strap"]`,
+
+    'Tripod (Gitzo)': `[Gitzo Tripod Flow] Ask ONE question at a time:
+1. Shooting scene → options:["Travel/hiking","Landscape/long exposure","Wildlife/telephoto","Video/cinema"]
+2. Gear weight → options:["Up to 3kg","3-6kg","6-10kg","10kg+"]
+3. Head needed? → options:["Tripod only","Need head too","Already have a head"]
+4. Portability → options:["As light as possible","Stability over weight","Balanced"]
+5. Budget → options:["Under ¥50,000","¥50,000-100,000","¥100,000-200,000","¥200,000+"]`,
+
+    'Monopod (Gitzo)': `[Gitzo Monopod Flow] Ask ONE question at a time:
+1. Shooting scene → options:["Sports/wildlife","Landscape/travel","Video/vlog"]
+2. Gear weight → options:["Up to 3kg","3-6kg","6kg+"]
+3. Section count → options:["Compact folding","Rigidity priority","No preference"]`,
+
+    'Head (Gitzo)': `[Gitzo Head Flow] Ask ONE question at a time:
+1. Main purpose → options:["Photography","Video","Panorama/360°"]
+2. Gear weight → options:["Up to 5kg","5-10kg","10-25kg"]
+3. Tripod combination → options:["With Gitzo tripod","With other brand tripod","Need tripod too"]`,
+
+    'Bag & Accessories': `[Gitzo Bag Flow] Ask ONE question at a time:
+1. What to store → options:["Tripod bag","Camera bag","Accessories"]
+2. Tripod size → options:["Compact (Traveler size)","Medium","Large (Systematic size)"]`,
+
+    'Backpack': `[Backpack Flow] Ask ONE question at a time:
+1. Gear to carry → options:["Mirrorless + 2-3 lenses","DSLR + 3-4 lenses","Large gear + accessories"]
+2. Largest lens → options:["Standard zoom","70-200mm","Super telephoto/cine lens"]
+3. Laptop → options:["Up to 13\\"","15\\"","Not needed"]
+4. Main scene → options:["Travel/hiking","Street/daily","Professional","Drone transport"]
+5. Rain cover → options:["Essential","Nice to have","Not needed"]`,
+
+    'Shoulder Bag': `[Shoulder Bag Flow] Ask ONE question at a time:
+1. Gear to carry → options:["Compact camera only","Camera + 1 lens","Camera + multiple lenses"]
+2. Bag style → options:["Shoulder bag","Sling","Top loading"]
+3. Main scene → options:["Daily/street","Travel","Sports/outdoor"]`,
+
+    'TLZ / Top Loading': `[TLZ Flow] Ask ONE question at a time:
+1. Lens size → options:["Up to 24-70mm","Up to 70-200mm","300mm+"]
+2. Priority → options:["Quick access","Solid protection","Both"]
+3. Usage → options:["Standalone use","As bag insert"]`,
+
+    'Lens & Hard Case': `[Case Flow] Ask ONE question at a time:
+1. What to store → options:["Interchangeable lens","Camera + accessories","Battery/small items"]
+2. Lens size → options:["Small (~8cm dia.)","Medium (~11cm dia.)","Large (~13cm dia.)"]
+3. Usage → options:["As bag insert","Standalone carry","Studio storage"]`,
+
+    'GearUp & Accessories': `[GearUp Flow] Ask ONE question at a time:
+1. What to store → options:["Cables/batteries","Camera body","Lens","Memory cards"]
+2. Usage → options:["As bag insert","Standalone use","Organization"]`,
   }
 };
 
@@ -187,13 +259,10 @@ function buildGuidancePrompt(lang, brand, category) {
     if (items.length > 0) {
       const slim = items.map(p => `${p.sku}|${p.name}`).join('\n');
       productListStr = lang === 'ja'
-        ? `\n【製品リスト（${items.length}件）— 実在するManfrotto製品】\n${slim}\n【絶対厳守】上記製品は全て実在します。「データがない」は絶対に言わないでください。`
+        ? `\n【製品リスト（${items.length}件）— 実在する製品】\n${slim}\n【絶対厳守】上記製品は全て実在します。「データがない」は絶対に言わないでください。`
         : `\n[Product List (${items.length} items — real products)]\n${slim}\n[MANDATORY] All products above are REAL. NEVER say they don't exist.`;
     }
   }
-
-  const exampleJa = `{"message":"動画撮影がメインですね！機材の重量を教えてください。","options":["〜2kg","2〜5kg","5〜10kg","10kg以上"]}`;
-  const exampleEn = `{"message":"Great, mainly for video! What's the weight of your equipment?","options":["~2kg","2-5kg","5-10kg","10kg+"]}`;
 
   return `You are a friendly ${brand && brand !== 'all' ? brand : 'Vitec'} product advisor.
 ${langRule}
@@ -216,9 +285,7 @@ RESPONSE FORMAT — output ONLY this JSON, nothing else:
 1. Output MUST be valid JSON only — no markdown, no extra text
 2. "options" array MUST contain 2-5 items — NEVER empty, NEVER omit
 3. Use the exact options shown after "→" in the flow above
-4. Each option must be short (under 15 characters)
-
-Example: ${lang === 'ja' ? exampleJa : exampleEn}`;
+4. Each option must be short (under 15 characters)`;
 }
 
 // ============================================================
@@ -232,7 +299,6 @@ function buildRecommendPrompt(lang, brand, category, messages) {
 
   console.log(`[RECOMMEND] brand:${brand} category:${category} products:${items.length}`);
 
-  // Gitzo・Loweproはローカルデータなし → AIに知識で推薦させる
   const productSection = items.length > 0
     ? `PRODUCT DATABASE — ${items.length}件（このリストからのみ推薦）:\n${JSON.stringify(items)}`
     : (lang === 'ja'
@@ -250,14 +316,14 @@ ${productSection}
 WEIGHT SAFETY: payload_kg ≥ (camera + lens weight) × 2
 
 RESPONSE FORMAT — strict JSON only:
-{"type":"products","message":"intro text","items":[{"name":"製品名","sku":"型番","reason":"推薦理由2〜3文","price":数値またはnull}]}
+{"type":"products","message":"intro text","items":[{"name":"製品名","sku":"型番","brand":"ブランド","reason":"推薦理由2〜3文","price":数値orNull}]}
 
-Recommend 3-5 products. Never return empty items array — always recommend something.
+Recommend 5-7 products. Never return empty items array — always recommend something.
 Never invent products that don't exist.`;
 }
 
 // ============================================================
-// メインハンドラー
+// メインハンドラー（OpenRouter + Claude Haiku）
 // ============================================================
 export default async function handler(req, res) {
   res.setHeader('Access-Control-Allow-Origin', '*');
@@ -275,9 +341,10 @@ export default async function handler(req, res) {
   const lastUserMsg = userMessages[userMessages.length - 1]?.content || '';
   const recommendSignals = /以上です|おすすめして|推薦して|お願いします|please recommend|show me|suggest/i;
 
-  const shouldRecommend = forceRecommend ||
-    (userMessages.length >= 5) ||
-    (userMessages.length >= 3 && recommendSignals.test(lastUserMsg));
+  // V2と同じ：forceRecommendのみで推薦（質問途中での早期推薦を防ぐ）
+  const minTurns = 4;
+  const shouldRecommend = (forceRecommend === true) ||
+    (userMessages.length >= minTurns && recommendSignals.test(lastUserMsg));
 
   const phase = shouldRecommend ? 'RECOMMEND' : 'GUIDE';
   const systemPrompt = shouldRecommend
@@ -287,6 +354,7 @@ export default async function handler(req, res) {
   console.log(`[${phase}] lang:${lang} brand:${brand} category:${category} turns:${userMessages.length}`);
 
   try {
+    // V1: OpenRouter経由でClaude Haikuを呼び出す
     const response = await fetch('https://openrouter.ai/api/v1/chat/completions', {
       method: 'POST',
       headers: {
@@ -302,7 +370,7 @@ export default async function handler(req, res) {
           ...messages
         ],
         temperature: 0.1,
-        max_tokens: 1000
+        max_tokens: 1500
       })
     });
 
@@ -327,7 +395,7 @@ export default async function handler(req, res) {
     // 価格をローカルDBから補完（Manfrottoのみ）
     if (parsed?.type === 'products' && parsed.items) {
       const priceMap = {};
-      for (const cat of ['tripods', 'bags', 'heads', 'monopods', 'lighting']) {
+      for (const cat of ['tripods', 'bags', 'heads', 'monopods', 'lighting', 'accessories']) {
         try {
           const d = loadMini(`${cat}.json`);
           if (!d) continue;
